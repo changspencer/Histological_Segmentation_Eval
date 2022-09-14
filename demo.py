@@ -167,6 +167,8 @@ def parse_args():
                         help='Flag for feature extraction. False, train whole model. True, only update fully connected and histogram layers parameters (default: True)')
     parser.add_argument('--use_pretrained', type=bool, default=False,
                         help='Flag to use pretrained model from ImageNet or train from scratch (default: False)')
+    parser.add_argument('--data_split', type=str, default='Normal',
+                        help='whether to split SFBHI at time split (default: Normal)')
     parser.add_argument('--train_batch_size', type=int, default=1,
                         help='input batch size for training (default: 8)')
     parser.add_argument('--val_batch_size', type=int, default=1,
