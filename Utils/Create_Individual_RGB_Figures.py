@@ -18,7 +18,7 @@ import torch.nn as nn
 
 ## Local external libraries
 from Demo_Parameters import Parameters
-from Utils.initialize_model import initialize_model
+from Utils.Initialize_Model import initialize_model
 from Utils.functional import *
 from Utils.decode_segmentation import decode_segmap
 from Utils.metrics import eval_metrics
