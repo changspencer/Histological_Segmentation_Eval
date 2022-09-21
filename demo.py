@@ -169,11 +169,11 @@ def parse_args():
                         help='Flag to use pretrained model from ImageNet or train from scratch (default: False)')
     parser.add_argument('--data_split', type=str, default='Normal',
                         help='whether to split SFBHI at time split (default: Normal)')
-    parser.add_argument('--train_batch_size', type=int, default=1,
+    parser.add_argument('--train_batch_size', type=int, default=8,
                         help='input batch size for training (default: 8)')
-    parser.add_argument('--val_batch_size', type=int, default=1,
+    parser.add_argument('--val_batch_size', type=int, default=10,
                         help='input batch size for validation (default: 10)')
-    parser.add_argument('--test_batch_size', type=int, default=1,
+    parser.add_argument('--test_batch_size', type=int, default=10,
                         help='input batch size for testing (default: 10)')
     parser.add_argument('--num_epochs', type=int, default=2,
                         help='Number of epochs to train each model for (default: 150)')
