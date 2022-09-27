@@ -33,7 +33,7 @@ import pdb
 #Turn off plotting
 plt.ioff()
 
-def main(Params,args):
+def main(Params, args):
     # #Reproducibility
     torch.manual_seed(Params['random_state'])
     np.random.seed(Params['random_state'])
@@ -64,6 +64,8 @@ def main(Params,args):
     print("Initializing Datasets and Dataloaders...")
     
     #Return indices of training/validation/test data
+    Params['imgs_dir'] = os.path.join(os.path.dirname(__file__),
+                                      Params['imgs_dir'])
     indices = Prepare_DataLoaders(Params,numRuns)
     
     #Loop counter
@@ -205,12 +207,13 @@ if __name__ == "__main__":
     #Trains all models
     model_list = ['JOSHUA+','UNET','UNET+','Attention_UNET', 'JOSHUA']
     args = parse_args()
-    
+    args.folder = os.path.join(os.path.dirname(__file__), args.folder)
+
     model_count = 0
     for model in model_list:
         setattr(args, 'model', model)
         params = Parameters(args)
-        main(params,args)
+        main(params, args)
         model_count += 1
         print('Finished Model {} of {}'.format(model_count,len(model_list)))
         

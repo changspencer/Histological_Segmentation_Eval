@@ -143,13 +143,13 @@ def Parameters(args):
 
     
     #Location of segmentation datasets (images and masks)
-    img_dirs = {'SFBHI': './Datasets/SFBHI/Images/', 
-                'GlaS': './Datasets/GlaS/'}
+    img_dirs = {'SFBHI': 'Datasets/SFBHI/Images/', 
+                'GlaS': 'Datasets/GlaS/'}
     
     
     #Light directory
-    mask_dirs = {'SFBHI': './Datasets/SFBHI/Labels/', 
-                 'GlaS': './Datasets/GlaS/'}
+    mask_dirs = {'SFBHI': 'Datasets/SFBHI/Labels/', 
+                 'GlaS': 'Datasets/GlaS/'}
         
     #Number of classes in each dataset
     num_classes = {'SFBHI': 1, 
@@ -159,10 +159,10 @@ def Parameters(args):
     #For SFBHI, should be 5 unless "time" split (4)
     if (args.data_split == 'Time_Folds') or (args.data_split == 'Val_Week_8'):
         Splits = {'SFBHI': 4, 
-              'GlaS': 5}
+                  'GlaS': 5}
     else:
         Splits = {'SFBHI': 5, 
-              'GlaS': 5}
+                  'GlaS': 5}
 
     
     Dataset = Dataset_names[data_selection]
