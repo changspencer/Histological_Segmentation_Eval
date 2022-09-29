@@ -55,7 +55,8 @@ def Generate_Dir_Name(split,Network_parameters):
 
 def train_net(net,device,indices,split,Network_parameters,epochs=5,
               batch_size={'train': 1,'val': 1, 'test': 1},lr=0.001,save_cp=True,
-              save_results=True,save_epoch=5,dir_checkpoint='checkpoints/'):
+              save_results=True,save_epoch=5,dir_checkpoint='checkpoints/',
+              comet_exp=None):
     
     dir_name,sum_name = Generate_Dir_Name(split, Network_parameters)
     
@@ -139,92 +140,109 @@ def train_net(net,device,indices,split,Network_parameters,epochs=5,
             
             if phase == 'train':
                 net.train()
+                with None if comet_exp is None else comet_exp.train() as exp:
+                    for idx, batch in enumerate(Bar(dataloaders[phase])):
+                        # pdb.set_trace()
+                        imgs = batch['image']
+                        true_masks = batch['mask']
+                    
+                        assert imgs.shape[1] == n_channels, \
+                            f'Network has been defined with {n_channels} input channels, ' \
+                            f'but loaded images have {imgs.shape[1]} channels. Please check that ' \
+                            'the images are loaded correctly.'
         
-                for idx, batch in enumerate(Bar(dataloaders[phase])):
-                    # pdb.set_trace()
-                    imgs = batch['image']
-                    true_masks = batch['mask']
-                
-                    assert imgs.shape[1] == n_channels, \
-                        f'Network has been defined with {n_channels} input channels, ' \
-                        f'but loaded images have {imgs.shape[1]} channels. Please check that ' \
-                        'the images are loaded correctly.'
-    
-                    imgs = imgs.to(device=device, dtype=torch.float32)
-                    mask_type = torch.float32 if n_classes == 1 else torch.long
-                    true_masks = true_masks.to(device=device, dtype=mask_type)
-                    
-                    masks_pred = net(imgs)
-                    
-                    if n_classes > 1:
-                        loss = criterion(masks_pred, true_masks) #Target should be NxHxW
-                        pred_out = torch.argmax(masks_pred, dim=1)
-                      
-                    else:
-                        loss = criterion(masks_pred, true_masks) #Target should be NxCxHxW
+                        imgs = imgs.to(device=device, dtype=torch.float32)
+                        mask_type = torch.float32 if n_classes == 1 else torch.long
+                        true_masks = true_masks.to(device=device, dtype=mask_type)
                         
-                    #Aggregate loss for epoch
-                    epoch_loss += loss.item() * imgs.size(0)
-                    del imgs
-                    torch.cuda.empty_cache()
-                   
-                    if n_classes > 1:
-                        overall_acc, class_acc, avg_jacc, avg_dice, avg_mAP = eval_metrics(true_masks,masks_pred,n_classes)
-                        epoch_jacc += avg_jacc
-                        epoch_dice += avg_dice
-                        epoch_mAP += avg_mAP
-                        epoch_acc += overall_acc
-                        epoch_class_acc += class_acc
-                    else:
-                        pred_out = (torch.sigmoid(masks_pred) > .5).float()
-                        temp_haus, temp_haus_count = Average_Metric(pred_out, 
-                                                                    true_masks,
-                                                                    metric_name='Hausdorff')
-                        epoch_haus_dist += temp_haus
-                        epoch_dice += dice_coeff(pred_out, true_masks).item()
+                        masks_pred = net(imgs)
+                        
+                        if n_classes > 1:
+                            loss = criterion(masks_pred, true_masks) #Target should be NxHxW
+                            pred_out = torch.argmax(masks_pred, dim=1)
+                        
+                        else:
+                            loss = criterion(masks_pred, true_masks) #Target should be NxCxHxW
                             
-                        epoch_IOU_pos += Average_Metric(pred_out, true_masks,metric_name='Jaccard')
-                        epoch_IOU += Average_Metric(pred_out, true_masks,metric_name='IOU_All')
-                        epoch_acc += Average_Metric(pred_out, true_masks,metric_name='Acc')
-                        inf_samps += temp_haus_count
-                        epoch_prec += Average_Metric(pred_out, true_masks,metric_name='Precision')
-                        epoch_rec += Average_Metric(pred_out, true_masks,metric_name='Recall')
-                        epoch_f1_score += Average_Metric(pred_out, true_masks,metric_name='F1')
-                        epoch_adj_rand += Average_Metric(pred_out, true_masks,metric_name='Rand')
-    
-                    optimizer.zero_grad()
-                    loss.backward()
-                    nn.utils.clip_grad_value_(net.parameters(), 0.1) 
-                    optimizer.step()
-
-                total = len(dataloaders[phase].sampler)
-                if n_classes > 1:
-                    writer.add_scalar('Dice_F1/train', epoch_dice/total, global_step)
-                    writer.add_scalar('Jaccard/train',epoch_jacc/total,global_step)
-                    writer.add_scalar('Loss/train', epoch_loss, global_step)
-                    writer.add_scalar('Pixel_Acc/train',epoch_acc/total,global_step)
-                    writer.add_scalar('mAP/train',epoch_mAP/total,global_step)
-                
+                        #Aggregate loss for epoch
+                        epoch_loss += loss.item() * imgs.size(0)
+                        del imgs
+                        torch.cuda.empty_cache()
                     
-                    print('{} Loss: {:.4f} mAP: {:.4f} F1: {:.4f}'.format(phase, epoch_loss/total, 
-                                                                          epoch_mAP/total,epoch_dice/total))   
-                
-                else:
-                    writer.add_scalar('Dice/train', epoch_dice/total, global_step)
-                    writer.add_scalar('IOU_pos/train',epoch_IOU_pos/total,global_step)
-                    writer.add_scalar('Loss/train', epoch_loss, global_step)
-                    writer.add_scalar('Pixel_Acc/train',epoch_acc/total,global_step)
-                    writer.add_scalar('Overall_IOU/train',epoch_IOU/total,global_step)
-                    writer.add_scalar('HausdorffDistance/train',epoch_haus_dist/(total-inf_samps+1e-7),global_step)
-                    writer.add_scalar('adj_rand/train',epoch_adj_rand/total,global_step)
-                    writer.add_scalar('precison/train',epoch_prec/total,global_step)
-                    writer.add_scalar('recall/train',epoch_rec/total,global_step)
-                    writer.add_scalar('f1_score/train',epoch_f1_score/total)
-                
-                    print('{} Loss: {:.4f} IOU_pos: {:.4f} Dice Coefficient: {:.4f}'.format(phase, 
-                                                                                                  epoch_loss/total, 
-                                                                                                  epoch_IOU_pos/total,
-                                                                                                  epoch_dice/total))   
+                        if n_classes > 1:
+                            overall_acc, class_acc, avg_jacc, avg_dice, avg_mAP = eval_metrics(true_masks,masks_pred,n_classes)
+                            epoch_jacc += avg_jacc
+                            epoch_dice += avg_dice
+                            epoch_mAP += avg_mAP
+                            epoch_acc += overall_acc
+                            epoch_class_acc += class_acc
+                        else:
+                            pred_out = (torch.sigmoid(masks_pred) > .5).float()
+                            temp_haus, temp_haus_count = Average_Metric(pred_out, 
+                                                                        true_masks,
+                                                                        metric_name='Hausdorff')
+                            epoch_haus_dist += temp_haus
+                            epoch_dice += dice_coeff(pred_out, true_masks).item()
+                                
+                            epoch_IOU_pos += Average_Metric(pred_out, true_masks,metric_name='Jaccard')
+                            epoch_IOU += Average_Metric(pred_out, true_masks,metric_name='IOU_All')
+                            epoch_acc += Average_Metric(pred_out, true_masks,metric_name='Acc')
+                            inf_samps += temp_haus_count
+                            epoch_prec += Average_Metric(pred_out, true_masks,metric_name='Precision')
+                            epoch_rec += Average_Metric(pred_out, true_masks,metric_name='Recall')
+                            epoch_f1_score += Average_Metric(pred_out, true_masks,metric_name='F1')
+                            epoch_adj_rand += Average_Metric(pred_out, true_masks,metric_name='Rand')
+        
+                        optimizer.zero_grad()
+                        loss.backward()
+                        nn.utils.clip_grad_value_(net.parameters(), 0.1) 
+                        optimizer.step()
+
+                    total = len(dataloaders[phase].sampler)
+                    metrics_dict = {}
+                    if n_classes > 1:
+                        writer.add_scalar('Dice_F1/train', epoch_dice/total, global_step)
+                        writer.add_scalar('Jaccard/train',epoch_jacc/total,global_step)
+                        writer.add_scalar('Loss/train', epoch_loss, global_step)
+                        writer.add_scalar('Pixel_Acc/train',epoch_acc/total,global_step)
+                        writer.add_scalar('mAP/train',epoch_mAP/total,global_step)
+                        metrics_dict['Dice_F1'] = epoch_dice / total
+                        metrics_dict['Jaccard'] = epoch_jacc / total
+                        metrics_dict['Loss'] = epoch_loss
+                        metrics_dict['Pixel_Acc'] = epoch_acc / total
+                        metrics_dict['mAP'] = epoch_mAP / total
+                    
+                        print('{} Loss: {:.4f} mAP: {:.4f} F1: {:.4f}'.format(phase, epoch_loss/total, 
+                                                                            epoch_mAP/total,epoch_dice/total))   
+
+                    else:
+                        writer.add_scalar('Dice/train', epoch_dice/total, global_step)
+                        writer.add_scalar('IOU_pos/train',epoch_IOU_pos/total,global_step)
+                        writer.add_scalar('Loss/train', epoch_loss, global_step)
+                        writer.add_scalar('Pixel_Acc/train',epoch_acc/total,global_step)
+                        writer.add_scalar('Overall_IOU/train',epoch_IOU/total,global_step)
+                        writer.add_scalar('HausdorffDistance/train',epoch_haus_dist/(total-inf_samps+1e-7),global_step)
+                        writer.add_scalar('adj_rand/train',epoch_adj_rand/total,global_step)
+                        writer.add_scalar('precison/train',epoch_prec/total,global_step)
+                        writer.add_scalar('recall/train',epoch_rec/total,global_step)
+                        writer.add_scalar('f1_score/train',epoch_f1_score/total)
+                        metrics_dict['Dice_F1'] = epoch_dice / total
+                        metrics_dict['IOU_pos'] = epoch_IOU_pos / total
+                        metrics_dict['Loss'] = epoch_loss
+                        metrics_dict['Pixel_Acc'] = epoch_acc / total
+                        metrics_dict['Overall_IOU'] = epoch_IOU / total
+                        metrics_dict['HausdorffDistance'] = epoch_haus_dist / (total-inf_samps+1e-7)
+                        metrics_dict['adj_rand'] = epoch_adj_rand / total
+                        metrics_dict['precison'] = epoch_prec / total
+                        metrics_dict['recall'] = epoch_rec / total
+                        metrics_dict['f1_score'] = epoch_f1_score / total
+                    
+                        print('{} Loss: {:.4f} IOU_pos: {:.4f} Dice Coefficient: {:.4f}'.format(phase, 
+                                                                                                    epoch_loss/total, 
+                                                                                                    epoch_IOU_pos/total,
+                                                                                                    epoch_dice/total))
+                    if exp is not None:
+                        comet_exp.log_metrics(metrics_dict, epoch=global_step - 1)
             else:
                     net.eval()
                         
@@ -234,8 +252,15 @@ def train_net(net,device,indices,split,Network_parameters,epochs=5,
                             writer.add_histogram('weights/' + tag, value.data.cpu().numpy(), global_step)
                             writer.add_histogram('grads/' + tag, value.grad.data.cpu().numpy(), global_step)
                       
-          
-                    val_dict = eval_net(net, dataloaders['val'], device, pos_wt=torch.tensor(pos_wt))
+                    with None if comet_exp is None else comet_exp.validate() as exp:
+                        val_dict = eval_net(net,
+                                            dataloaders['val'],
+                                            device,
+                                            pos_wt=torch.tensor(pos_wt),
+                                            comet_status=exp,
+                                            comet_exp=comet_exp)
+                        if exp is not None:
+                            comet_exp.log_metrics(val_dict, epoch=global_step - 1)
                   
                     if n_classes > 1:
                         logging.info('Validation cross entropy: {}'.format(val_dict['loss']))
@@ -282,6 +307,7 @@ def train_net(net,device,indices,split,Network_parameters,epochs=5,
             best_model = net
             best_model = net
             val_metrics = val_dict
+            print(f"Saving best {Network_parameters['Model_name']} model...")
             
          #Early stop once loss stops improving
         if early_stopping.early_stop:
@@ -300,7 +326,7 @@ def train_net(net,device,indices,split,Network_parameters,epochs=5,
                        dir_name+dir_checkpoint + f'CP_epoch{epoch + 1}.pth')
             logging.info(f'Checkpoint {epoch + 1} saved !')
 
-    #Test model on hold out test set
+    #Test model on hold out test set - Not saved in Comet logs to avoid indirect training
     test_metrics = eval_net(best_model, dataloaders['test'], device, pos_wt=torch.tensor(pos_wt))
     
     

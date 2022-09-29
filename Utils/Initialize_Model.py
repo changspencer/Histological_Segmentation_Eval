@@ -14,7 +14,8 @@ from .models.unet_model import UNet
 from .models.attention_unet_model import AttUNet
 
        
-def initialize_model(model_name, num_classes,Network_parameters,analyze=False):
+def initialize_model(model_name, num_classes, Network_parameters,
+                    analyze=False, comet_exp=None):
  
     #Generate segmentation model 
     if (model_name == 'JOSHUA') or (model_name == 'JOSHUA+'):

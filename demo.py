@@ -24,6 +24,7 @@ import torch.nn as nn
 from Utils.Initialize_Model import initialize_model
 from Demo_Parameters import Parameters
 from Prepare_Data import Prepare_DataLoaders
+from Utils.Save_Results import save_params
 
 #UNET functions
 from Utils.train import train_net
@@ -79,27 +80,29 @@ def main(Params, args):
     
     for split in range(0, numRuns):
         
-        # if Experiment is None:  # Comet-ML Logging initialization
-        #     experiment = None
-        # else:  # Not yet sure whether to also use this for logging HistRes inits
-        #     proj_name = 'segmentation'
-        #     experiment = Experiment(
-        #         api_key="cf2AdIgBb4jLjQZHyCyWoo2k2",
-        #         project_name=proj_name,
-        #         workspace="changspencer",
-        #     )
-        #     experiment.set_name(f"{Dataset}-{model_name}-{split+1}")
+        if Experiment is None:  # Comet-ML Logging initialization
+            experiment = None
+        else:  # Not yet sure whether to also use this for logging HistRes inits
+            proj_name = 'segmentation'
+            experiment = Experiment(
+                api_key="cf2AdIgBb4jLjQZHyCyWoo2k2",
+                project_name=proj_name,
+                workspace="changspencer",
+            )
+            experiment.set_name(f"{Dataset}-{model_name}-{split+1}")
         
-        # print('Starting Experiments...')
-        # if experiment is not None:
-        #     experiment.log_parameters(Params)
-        #     # save_params(Network_parameters)
-        # else:
-        #     # save_params(Network_parameters)
-        #     print()
+        print('Starting Experiments...')
+        if experiment is not None:
+            experiment.log_parameters(Params)
+            save_params(Params, split)
+        else:
+            save_params(Params, split)
+            print()
 
         # Initialize the segmentation model for this run
-        model = initialize_model(model_name, num_classes,Params)
+        model = initialize_model(model_name, num_classes, Params)
+        if experiment is not None:
+            experiment.set_model_graph(model)
         
         # Send the model to GPU if available, use multiple if available
         if torch.cuda.device_count() > 1:
@@ -131,14 +134,18 @@ def main(Params, args):
                  f'\t{"Bilinear" if bilinear else "Transposed conv"} upscaling\n'
                  f'\tTotal number of trainable parameters: {num_params}')
                
-            train_net(net=model,device=device,indices=indices,
-                      split=split,Network_parameters=Params,
+            train_net(net=model,
+                      device=device,
+                      indices=indices,
+                      split=split,
+                      Network_parameters=Params,
                       epochs=Params['num_epochs'],
                       batch_size=Params['batch_size'],
                       lr=Params['lr_rate'],
-                      save_cp = Params['save_cp'],
-                      save_results = Params['save_results'],
-                      save_epoch = Params['save_epoch'])
+                      save_cp=Params['save_cp'],
+                      save_results=Params['save_results'],
+                      save_epoch=Params['save_epoch'],
+                      comet_exp=experiment)
         
         except KeyboardInterrupt:
             torch.save(model.state_dict(), 'INTERRUPTED.pth')

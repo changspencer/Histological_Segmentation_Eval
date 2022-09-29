@@ -17,7 +17,8 @@ from .functional import *
 from .metrics import eval_metrics
 from barbar import Bar
 
-def eval_net(net, loader, device,pos_wt=torch.tensor(1),best_wts=None):
+def eval_net(net, loader, device, pos_wt=torch.tensor(1),
+             best_wts=None, comet_status=None, comet_exp=None):
     """Evaluation without the densecrf with the dice coefficient"""
     if best_wts is not None:
         net.load_state_dict(best_wts)
