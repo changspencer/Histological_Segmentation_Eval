@@ -24,6 +24,7 @@ from os.path import splitext
 from os import listdir
 import os
 import pdb
+import pathlib
 from glob import glob
 import itertools
 import numpy as np
@@ -158,3 +159,75 @@ class PhotoDataset(Dataset):
                 mask[mask<.5] = 0
 
         return {'image':image,'mask': mask, 'index': img_name, 'label': label}
+
+
+class RootsDataset(Dataset):
+    """
+    Created on Mon May 21 14:55:40 2018
+
+    @author: weihuang.xu
+
+    Sourced from the GatorSense/EZNET GitHub Repository for working with PRMI data.
+    Some changes have been made to adapt it to Josh's Histological Segmentation code.
+    """
+    def __init__(self, root, mode='RGB', img_transform=None, label_transform=None):
+        self.root = root
+        self.mode = mode
+        self.img_transform = img_transform
+        self.label_transform = label_transform
+        self.files = []
+
+        imgdir = os.path.join(self.root, 'images')
+
+        for os_root, dirs, files in os.walk(imgdir):
+            for name in files:
+                if name != "placeholder.file":
+                    imgpath = os.path.join(os_root, name)
+
+                    rootp = pathlib.Path(os_root)
+                    index = rootp.parts.index('images')
+                    labelpath = os.path.join(self.root, 'masks_pixel_gt', *rootp.parts[index+1:])
+                    labelpath = os.path.join(labelpath, f"GT_{name}")
+                    # Label name validation
+                    if labelpath.endswith('.png'):
+                        self.files.append({
+                            "img": imgpath,
+                            "label": labelpath
+                        })
+                    else:
+                        ending = '.' + labelpath.split('.')[-1]
+                        self.files.append({
+                            "img": imgpath,
+                            "label": labelpath.replace(ending, '.png')
+                        })
+
+    def __len__(self):     
+        return len(self.files)
+
+    def __getitem__(self, index):
+        datafiles = self.files[index]
+
+        img_file = datafiles["img"]
+
+        if self.mode == 'RGB':
+            img = Image.open(img_file).convert('RGB')
+        if self.mode == 'gray':
+            img = Image.open(img_file).convert('L')
+            img = img.convert('RGB')
+                    
+        label_file = datafiles["label"]
+        label = Image.open(label_file).convert("1")
+
+
+        state = torch.get_rng_state()
+        if self.img_transform is not None:
+            img = self.img_transform(img)
+
+
+        torch.set_rng_state(state)
+        if self.label_transform is not None:
+            label = self.label_transform(label)  
+
+        label = np.array(label)
+
+        return {'image':img,'mask': label, 'index': img_file, 'label': label_file}

@@ -12,6 +12,8 @@ import pdb
 from os.path import join
 import pdb
 
+from Utils.dataset import RootsDataset
+
 #From WSL repo
 def csv_reader(fname):
     with open(fname, 'r') as f:
@@ -59,30 +61,45 @@ def Prepare_DataLoaders(Network_parameters, splits, data_type='time'):
     # Load datasets
     #Histologial images
     if (Dataset=='SFBHI'):
-       #Get files for each fold
-       train_indices = []
-       val_indices = []
-       test_indices = []
-       for fold in range(0,splits):
-           files = get_files(imgs_dir+'folds',1,fold,data_type=data_type)
-           temp_train, temp_val, temp_test = [decode_classes(f,class_label=False) for f in files]
-           train_indices.append(temp_train)
-           val_indices.append(temp_val)
-           test_indices.append(temp_test)
+        #Get files for each fold
+        train_indices = []
+        val_indices = []
+        test_indices = []
+        for fold in range(0,splits):
+            files = get_files(imgs_dir+'folds',1,fold,data_type=data_type)
+            temp_train, temp_val, temp_test = [decode_classes(f,class_label=False) for f in files]
+            train_indices.append(temp_train)
+            val_indices.append(temp_val)
+            test_indices.append(temp_test)
 
            
    #Glas Dataset
     elif Dataset == 'GlaS':
-       #Get files for each fold
-       train_indices = []
-       val_indices = []
-       test_indices = []
-       for fold in range(0,splits):
-           files = get_files(imgs_dir+'folds',0,fold,data_type='GlaS')
-           temp_train, temp_val, temp_test = [decode_classes(f) for f in files]
-           train_indices.append(temp_train)
-           val_indices.append(temp_val)
-           test_indices.append(temp_test)
+        #Get files for each fold
+        train_indices = []
+        val_indices = []
+        test_indices = []
+        for fold in range(0,splits):
+            files = get_files(imgs_dir+'folds',0,fold,data_type='GlaS')
+            temp_train, temp_val, temp_test = [decode_classes(f) for f in files]
+            train_indices.append(temp_train)
+            val_indices.append(temp_val)
+            test_indices.append(temp_test)
+
+
+   #Glas Dataset
+    elif Dataset == 'PRMI':
+        #Get files for each fold - For now, I'm not using any folds here.
+        train_indices = []
+        val_indices = []
+        test_indices = []
+        # I'd like to avoid "double loading" this dataset in the future
+        train_set = RootsDataset(root=imgs_dir + "/train")
+        val_set = RootsDataset(root=imgs_dir + "/val")
+        test_set = RootsDataset(root=imgs_dir + "/test")
+        train_indices.append([i for i in range(len(train_set))])
+        val_indices.append([i for i in range(len(val_set))])
+        test_indices.append([i for i in range(len(test_set))])
     
     #Generate indices (img files) for training, validation, and test
     indices = {'train': train_indices, 'val': val_indices, 'test': test_indices}

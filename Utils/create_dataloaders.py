@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 import torch
 from torchvision import transforms
 from .utils import ExpandedRandomSampler
-from .dataset import PhotoDataset
+from .dataset import PhotoDataset, RootsDataset
 import numpy as np
 import random
 
@@ -29,7 +29,7 @@ def Get_Dataloaders(split,indices,Network_parameters,batch_size):
                                                           rotate=Network_parameters['rotate'])
         pos_wt = 1
         
-    else:
+    elif Network_parameters['Dataset'] == 'SFBHI':
         train_loader, val_loader, test_loader = load_SFBHI(Network_parameters['imgs_dir'],
                                                           indices,batch_size,
                                                           Network_parameters['num_workers'],
@@ -41,6 +41,18 @@ def Get_Dataloaders(split,indices,Network_parameters,batch_size):
        
         #Get postive weight (for histological fat images only)
         pos_wt = 3
+        
+    elif Network_parameters['Dataset'] == 'PRMI':
+        train_loader, val_loader, test_loader = load_PRMI(Network_parameters['imgs_dir'],
+                                                          batch_size,
+                                                          Network_parameters['num_workers'],
+                                                          split=split,
+                                                          augment=Network_parameters['augment'],
+                                                          rotate=Network_parameters['rotate'],)
+                                                        #   patch_size=Network_parameters['center_size'])
+       
+        #Get postive weight (for histological fat images only)
+        pos_wt = 1
        
     dataloaders = {'train': train_loader, 'val': val_loader, 'test': test_loader}
     
@@ -126,6 +138,60 @@ def load_SFBHI(data_path,indices, batch_size, num_workers, pin_memory=True,
                      class_label=False,label_path=label_path),
         batch_size=batch_size['test'], num_workers=num_workers,
         pin_memory=pin_memory,worker_init_fn=seed_worker
+    )
+    
+    return train_loader, valid_loader, test_loader
+
+
+def load_PRMI(data_path, batch_size, num_workers, pin_memory=True,
+              split=0, patch_size=640, sampler_mul=8, augment=False, rotate=False):
+
+    # Resize to some 4:3 ratio because PRMI data is in 4:3 ratio.
+    resize_transform = [transforms.Resize((patch_size, patch_size * 3 // 4))]
+    # Train data transforms: Resizing and maybe some data augmentation
+    if augment:
+        train_transform = resize_transform + [
+            # transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.05),
+            transforms.ToTensor(),
+        ]
+    else:
+        train_transform = resize_transform + [transforms.ToTensor()]
+    # Test data transforms: resizing only
+    test_transform = transforms.Compose(resize_transform +
+                                        [transforms.ToTensor()])
+    # Mask transforms: resizing only
+    gt_transforms = transforms.Compose(resize_transform +
+                                       [transforms.ToTensor()])
+    
+    train_loader = DataLoader(
+        RootsDataset(
+            root=data_path + "/train",
+            img_transform=transforms.Compose(train_transform),
+            label_transform=gt_transforms,
+        ),
+        batch_size=batch_size['train'],
+        num_workers=num_workers,
+        pin_memory=pin_memory,
+        drop_last=True,worker_init_fn=seed_worker
+    )
+    valid_loader = DataLoader(
+        RootsDataset(root=data_path + "/val",
+                     img_transform=test_transform,
+                     label_transform=gt_transforms),
+        batch_size=batch_size['val'],
+        num_workers=num_workers,
+        shuffle=False,
+        pin_memory=pin_memory,
+        worker_init_fn=seed_worker
+    )
+    test_loader = DataLoader(
+        RootsDataset(root=data_path + "/test",
+                     img_transform=test_transform,
+                     label_transform=gt_transforms),
+        batch_size=batch_size['test'],
+        num_workers=num_workers,
+        pin_memory=pin_memory,
+        worker_init_fn=seed_worker
     )
     
     return train_loader, valid_loader, test_loader

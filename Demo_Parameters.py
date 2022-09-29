@@ -51,7 +51,7 @@ def Parameters(args):
     
     #Select dataset. Set to number of desired segmentation dataset
     data_selection = args.data_selection
-    Dataset_names = { 1: 'SFBHI', 2: 'GlaS'}
+    Dataset_names = { 1: 'SFBHI', 2: 'GlaS', 3: 'PRMI'}
     
     #If SFBHI, generate images with adipose tissue graphs
     if data_selection == 1:
@@ -79,7 +79,7 @@ def Parameters(args):
     center_size = args.center_size
     
     #Number of folds for K fold CV
-    fold_datasets = {1: 5, 2: 5}
+    fold_datasets = {1: 5, 2: 5, 3: 1}
     folds = fold_datasets[args.data_selection]
     
     #Set random state for K fold CV for repeatability of data/model initialization
@@ -141,30 +141,32 @@ def Parameters(args):
     ######## ONLY CHANGE PARAMETERS ABOVE ########
     mode = '{}_Split_RandSeed_{}'.format(args.data_split,args.random_state)
 
-    
     #Location of segmentation datasets (images and masks)
     img_dirs = {'SFBHI': 'Datasets/SFBHI/Images/', 
-                'GlaS': 'Datasets/GlaS/'}
-    
+                'GlaS': 'Datasets/GlaS/',
+                'PRMI': 'Datasets/PRMI/PRMI_official'}
     
     #Light directory
     mask_dirs = {'SFBHI': 'Datasets/SFBHI/Labels/', 
-                 'GlaS': 'Datasets/GlaS/'}
+                 'GlaS': 'Datasets/GlaS/',
+                 'PRMI': 'Datasets/PRMI/PRMI_official'}
         
     #Number of classes in each dataset
     num_classes = {'SFBHI': 1, 
-                 'GlaS': 1}
+                  'GlaS': 1,
+                  'PRMI': 1}  # only binary root segmentation
     
     #Number of runs and/or splits for each dataset (5 fold)
     #For SFBHI, should be 5 unless "time" split (4)
     if (args.data_split == 'Time_Folds') or (args.data_split == 'Val_Week_8'):
         Splits = {'SFBHI': 4, 
-                  'GlaS': 5}
+                  'GlaS': 5,
+                  'PRMI': 1}
     else:
         Splits = {'SFBHI': 5, 
-                  'GlaS': 5}
+                  'GlaS': 5,
+                  'PRMI': 1}
 
-    
     Dataset = Dataset_names[data_selection]
     imgs_dir = img_dirs[Dataset]
     masks_dir = mask_dirs[Dataset]
@@ -180,7 +182,7 @@ def Parameters(args):
                             + '_Pool_' +str(np.where(pool_locations)[0]+1))
     else: #Base UNET model
         Hist_model_name = None
-        
+
     #Return dictionary of parameters
     Network_parameters = {'save_results': save_results,'folder': folder, 
                           'Dataset': Dataset, 'imgs_dir': imgs_dir,

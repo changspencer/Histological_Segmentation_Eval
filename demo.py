@@ -30,6 +30,12 @@ from Utils.train import train_net
 
 import pdb
 
+# Comet ML logging package
+try:
+    from comet_ml import Experiment
+except:
+    Experiment = None
+
 #Turn off plotting
 plt.ioff()
 
@@ -73,6 +79,25 @@ def main(Params, args):
     
     for split in range(0, numRuns):
         
+        # if Experiment is None:  # Comet-ML Logging initialization
+        #     experiment = None
+        # else:  # Not yet sure whether to also use this for logging HistRes inits
+        #     proj_name = 'segmentation'
+        #     experiment = Experiment(
+        #         api_key="cf2AdIgBb4jLjQZHyCyWoo2k2",
+        #         project_name=proj_name,
+        #         workspace="changspencer",
+        #     )
+        #     experiment.set_name(f"{Dataset}-{model_name}-{split+1}")
+        
+        # print('Starting Experiments...')
+        # if experiment is not None:
+        #     experiment.log_parameters(Params)
+        #     # save_params(Network_parameters)
+        # else:
+        #     # save_params(Network_parameters)
+        #     print()
+
         # Initialize the segmentation model for this run
         model = initialize_model(model_name, num_classes,Params)
         
@@ -80,8 +105,7 @@ def main(Params, args):
         if torch.cuda.device_count() > 1:
             print("Using", torch.cuda.device_count(), "GPUs!")
             model = nn.DataParallel(model)
-        model = model.to(device)
-    
+
         # Send the model to GPU if available
         model = model.to(device)
         
@@ -154,12 +178,12 @@ def parse_args():
     parser.add_argument('--model', type=str, default='JOSHUA+',
                         help='Select model to train with (default: JOSHUA+')
     parser.add_argument('--data_selection', type=int, default=1,
-                        help='Dataset selection:  1: SFBHI, 2: GlaS')
+                        help='Dataset selection:  1: SFBHI, 2: GlaS, 3: PRMI')
     parser.add_argument('--channels', type=int, default=3,
                         help='Input channels of network (default: 3, RGB images)')
     parser.add_argument('--bilinear', type=bool, default=True,
                         help='Upsampling feature maps, set to True to use bilinear interpolation. Set to False to learn transpose convolution (consume more memory)')
-    parser.add_argument('--augment', type=bool, default=True,
+    parser.add_argument('--augment', type=bool, default=False,
                         help='Data augmentation (default: True)')
     parser.add_argument('--rotate', type=bool, default=True,
                         help='Training data will be rotated, random flip (p=.5), random patch extraction (default:True')
@@ -205,7 +229,8 @@ def parse_args():
 if __name__ == "__main__":
     
     #Trains all models
-    model_list = ['JOSHUA+','UNET','UNET+','Attention_UNET', 'JOSHUA']
+    # model_list = ['JOSHUA+','UNET','UNET+','Attention_UNET', 'JOSHUA']
+    model_list = ['UNET']
     args = parse_args()
     args.folder = os.path.join(os.path.dirname(__file__), args.folder)
 
