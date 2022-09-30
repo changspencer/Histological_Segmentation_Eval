@@ -180,6 +180,8 @@ class RootsDataset(Dataset):
         imgdir = os.path.join(self.root, 'images')
 
         for os_root, dirs, files in os.walk(imgdir):
+            if os_root.find("_noMask") > -1:
+                continue
             for name in files:
                 if name != "placeholder.file":
                     imgpath = os.path.join(os_root, name)
