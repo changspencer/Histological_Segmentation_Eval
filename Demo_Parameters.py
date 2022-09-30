@@ -97,6 +97,7 @@ def Parameters(args):
     #Flag to add BN to convolutional features (default: False)
     feature_extraction = args.feature_extraction
     add_bn = args.add_bn
+    use_pretrained = args.use_pretrained
     
     #Set initial learning rate for model
     #Recommended values are .001 or .01
@@ -206,5 +207,6 @@ def Parameters(args):
                           'pool_locations': pool_locations, 'bilinear': bilinear,
                           'random_state': random_state, 'save_cp': save_cp,
                           'save_epoch': save_epoch, 'use_attention': use_attention,
-                          'augment': augment, 'rotate': rotate, 'show_fat': show_fat}
+                          'augment': augment, 'rotate': rotate, 'show_fat': show_fat,
+                          'use_pretrained': use_pretrained}
     return Network_parameters

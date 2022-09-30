@@ -8,10 +8,13 @@ Created on Wed Jul 15 10:57:56 2020
 from __future__ import print_function
 from __future__ import division
 
+import torch
+
 ## Local external libraries
 from .models.Histogram_Model import JOSHUA
 from .models.unet_model import UNet
 from .models.attention_unet_model import AttUNet
+from .models.prmi_unet import PrmiUNet
 
        
 def initialize_model(model_name, num_classes, Network_parameters,
@@ -32,6 +35,15 @@ def initialize_model(model_name, num_classes, Network_parameters,
                              feature_extraction=Network_parameters['feature_extraction'],
                              add_bn=Network_parameters['add_bn'],
                              analyze=analyze)
+            
+    #PRMI UNET model for the roots segmentation (our version of attention)
+    elif (model_name == 'UNET') and Network_parameters['Dataset'] == 'PRMI': 
+        model = PrmiUNet(num_classes, Network_parameters['channels'],
+                         depth=5)
+
+        if Network_parameters['use_pretrained']:
+            state_dict = torch.load("Peanut_UnetD5.pth", map_location='cpu')
+            model.load_state_dict(state_dict)
             
     #Base UNET model or UNET+ (our version of attention)
     elif (model_name == 'UNET') or (model_name == 'UNET+'): 
