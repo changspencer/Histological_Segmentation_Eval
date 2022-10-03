@@ -48,7 +48,7 @@ def Get_Dataloaders(split,indices,Network_parameters,batch_size):
                                                           Network_parameters['num_workers'],
                                                           split=split,
                                                           augment=Network_parameters['augment'],
-                                                          rotate=Network_parameters['rotate'],)
+                                                          rotate=Network_parameters['rotate'],
                                                           patch_size=400)
        
         #Get postive weight (for histological fat images only)

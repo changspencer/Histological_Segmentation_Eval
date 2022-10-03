@@ -237,7 +237,7 @@ if __name__ == "__main__":
     
     #Trains all models
     # model_list = ['JOSHUA+','UNET','UNET+','Attention_UNET', 'JOSHUA']
-    model_list = ['UNET']
+    model_list = ['JOSHUA']
     args = parse_args()
     args.folder = os.path.join(os.path.dirname(__file__), args.folder)
 
