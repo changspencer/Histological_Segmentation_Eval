@@ -93,9 +93,9 @@ class Up(nn.Module):
         diffX = torch.tensor([x2.size()[3] - x1.size()[3]])
 
         x1 = F.pad(x1, [torch.div(diffX, 2, rounding_mode='floor'),
-                        torch.div(diffX - diffX, 2, rounding_mode='floor'),
+                        diffX - torch.div(diffX, 2, rounding_mode='floor'),
                         torch.div(diffY, 2, rounding_mode='floor'),
-                        torch.div(diffY - diffY, 2, rounding_mode='floor')
+                        diffY - torch.div(diffY, 2, rounding_mode='floor')
                        ])
         # if you have padding issues, see
         # https://github.com/HaiyongJiang/U-Net-Pytorch-Unstructured-Buggy/commit/0e854509c2cea854e247a9c615f175f76fbb2e3a
@@ -179,9 +179,9 @@ class UpHist(nn.Module):
         diffX = torch.tensor([x2.size()[3] - x1.size()[3]])
 
         x1 = F.pad(x1, [torch.div(diffX, 2, rounding_mode='floor'),
-                        torch.div(diffX - diffX, 2, rounding_mode='floor'),
+                        diffX - torch.div(diffX, 2, rounding_mode='floor'),
                         torch.div(diffY, 2, rounding_mode='floor'),
-                        torch.div(diffY - diffY, 2, rounding_mode='floor')
+                        diffY - torch.div(diffY, 2, rounding_mode='floor')
                        ])
         
         # if you have padding issues, see
