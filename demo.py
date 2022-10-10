@@ -105,7 +105,7 @@ def main(Params, args):
             experiment.set_model_graph(model)
         
         # Send the model to GPU if available, use multiple if available
-        if torch.cuda.device_count() > 1:
+        if use_cuda and torch.cuda.device_count() > 1:
             print("Using", torch.cuda.device_count(), "GPUs!")
             model = nn.DataParallel(model)
 

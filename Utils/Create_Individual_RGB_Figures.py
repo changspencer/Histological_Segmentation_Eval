@@ -121,7 +121,7 @@ def Generate_Images(dataloaders,mask_type,seg_models,device,split,
             
                 
                 # Initialize the segmentation model for this run
-                for key in seg_models:
+                for key_idx, key in enumerate(seg_models):
                     
                     setattr(args, 'model', seg_models[key])
                     temp_params = Parameters(args)
@@ -167,31 +167,31 @@ def Generate_Images(dataloaders,mask_type,seg_models,device,split,
                         agreement = preds_mask * gt_mask
                         temp_overlap[agreement, :] = [155/255, 191/255, 133/255]
                         
-                        temp_ax[key+2].imshow(imgs[img].cpu().permute(1,2,0))
-                        temp_ax[key+2].imshow(temp_overlap,alpha=alpha)
-                        temp_ax[key+2].tick_params(axis='both', labelsize=0, length = 0)
+                        temp_ax[key_idx+2].imshow(imgs[img].cpu().permute(1,2,0))
+                        temp_ax[key_idx+2].imshow(temp_overlap,alpha=alpha)
+                        temp_ax[key_idx+2].tick_params(axis='both', labelsize=0, length = 0)
                         
                     else:
                         temp_pred = torch.argmax(preds[0], dim=0).detach().cpu().numpy()
                         temp_pred = decode_segmap(temp_pred,nc=num_classes)
-                        temp_ax[0,key+2].imshow(temp_pred,
+                        temp_ax[0, key_idx+2].imshow(temp_pred,
                                                 interpolation=None,alpha=alpha)
-                        temp_ax[0,key+2].tick_params(axis='both', labelsize=0, length = 0)
+                        temp_ax[0, key_idx+2].tick_params(axis='both', labelsize=0, length = 0)
                         
                         #Plot masks only
-                        temp_ax[1,key+2].imshow(temp_pred)
-                        temp_ax[1,key+2].tick_params(axis='both', labelsize=0, length = 0)
+                        temp_ax[1, key_idx+2].imshow(temp_pred)
+                        temp_ax[1, key_idx+2].tick_params(axis='both', labelsize=0, length = 0)
                         
                         #Computed weighted IOU (account for class imbalance)
                         _, _, avg_jacc, avg_dice, avg_mAP = eval_metrics(true_masks[img].unsqueeze(0),
                                                                          preds,num_classes)
-                        temp_ax[1,key+2].set_title('IOU: {:.2f}, \n F1 Score: {:.2f}, \n mAP: {:.2f}'.format(avg_jacc, avg_dice, avg_mAP))
+                        temp_ax[1, key_idx+2].set_title('IOU: {:.2f}, \n F1 Score: {:.2f}, \n mAP: {:.2f}'.format(avg_jacc, avg_dice, avg_mAP))
                     del model
                     torch.cuda.empty_cache()
 
                     #Compute estimated fat
                     if show_fat:
-                        temp_fat[key+1] = preds[0].count_nonzero().item() * (temp_org_size/temp_ds_size) * (temp_org_rate)**2
+                        temp_fat[key_idx+1] = preds[0].count_nonzero().item() * (temp_org_size/temp_ds_size) * (temp_org_rate)**2
                 
                 folder = fig_dir + '{}_Segmentation_Maps/Run_{}/'.format(phase.capitalize(),split+1)
                 

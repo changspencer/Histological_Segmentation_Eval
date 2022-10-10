@@ -208,23 +208,25 @@ class RootsDataset(Dataset):
 
     def __getitem__(self, index):
         datafiles = self.files[index]
-
+        
+        # Get specific filename (not filepath)
         img_file = datafiles["img"]
+        img_name = img_file.rsplit('/',1)[-1].rsplit('.',1)[0]
+        if img_name is not list:
+            img_name = img_file.rsplit('\\',1)[-1].rsplit('.',1)[0]
 
         if self.mode == 'RGB':
             img = Image.open(img_file).convert('RGB')
         if self.mode == 'gray':
             img = Image.open(img_file).convert('L')
             img = img.convert('RGB')
-                    
+
         label_file = datafiles["label"]
         label = Image.open(label_file).convert("1")
-
 
         state = torch.get_rng_state()
         if self.img_transform is not None:
             img = self.img_transform(img)
-
 
         torch.set_rng_state(state)
         if self.label_transform is not None:
@@ -232,4 +234,4 @@ class RootsDataset(Dataset):
 
         label = np.array(label)
 
-        return {'image':img,'mask': label, 'index': img_file, 'label': label_file}
+        return {'image':img, 'mask': label, 'index': img_name, 'label': label_file}

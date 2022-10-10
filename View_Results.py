@@ -66,7 +66,8 @@ def main(Params,args):
                    'class_acc': 'Pixel Class Accuarcy', 'mAP': 'Mean Average Precision',
                    'loss': 'Cross Entropy', 'inf_time': 'Inference Time'}
     
-    seg_models = {0: 'UNET', 1: 'UNET+', 2: 'Attention_UNET', 3:'JOSHUA', 4: 'JOSHUA+'}
+    # seg_models = {0: 'UNET', 1: 'UNET+', 2: 'Attention_UNET', 3:'JOSHUA', 4: 'JOSHUA+'}
+    seg_models = {0: 'UNET', 3: 'JOSHUA'}  #, 1: 'UNET+', 2: 'Attention_UNET', 3:'JOSHUA', 4: 'JOSHUA+'}
     
     
     #Return datasets and indices of training/validation data
