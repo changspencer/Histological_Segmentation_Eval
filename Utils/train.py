@@ -162,7 +162,10 @@ def train_net(net,device,indices,split,Network_parameters,epochs=5,
                             pred_out = torch.argmax(masks_pred, dim=1)
                         
                         else:
-                            loss = criterion(masks_pred, true_masks) #Target should be NxCxHxW
+                            # Bootstrapping with masked sampling, arbitrary threshold value
+                            ohem_mask = ((torch.sigmoid(masks_pred) > .45) * 
+                                         (torch.sigmoid(masks_pred) < .55)).float().detach()
+                            loss = criterion(masks_pred * ohem_mask, true_masks) #Target should be NxCxHxW
                             
                         #Aggregate loss for epoch
                         epoch_loss += loss.item() * imgs.size(0)
