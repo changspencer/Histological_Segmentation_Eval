@@ -127,7 +127,9 @@ def Generate_Images(dataloaders,mask_type,seg_models,device,split,
                     temp_params = Parameters(args)
                     model = initialize_model(seg_models[key], num_classes,temp_params)
                     sub_dir, fig_dir = Generate_Dir_Name(split, temp_params)
-                    
+
+                    print(" -- Evaluating {} model...".format(seg_models[key]))
+
                     #If parallelized, need to set model
                       # Send the model to GPU if available
                     try:
