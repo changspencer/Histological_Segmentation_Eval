@@ -6,6 +6,7 @@ Only change parameters in this file before running
 demo.py
 @author: jpeeples 
 """
+from os import path
 import numpy as np
 
 def Parameters(args):
@@ -141,16 +142,17 @@ def Parameters(args):
     
     ######## ONLY CHANGE PARAMETERS ABOVE ########
     mode = '{}_Split_RandSeed_{}'.format(args.data_split,args.random_state)
-
+    true_dir = path.abspath(path.dirname(__file__)) + "/"
+    
     #Location of segmentation datasets (images and masks)
-    img_dirs = {'SFBHI': 'Datasets/SFBHI/Images/', 
-                'GlaS': 'Datasets/GlaS/',
-                'PRMI': 'Datasets/PRMI/PRMI_official'}
+    img_dirs = {'SFBHI': true_dir + 'Datasets/SFBHI/Images/', 
+                'GlaS':  true_dir +'Datasets/GlaS/',
+                'PRMI':  true_dir +'Datasets/PRMI/PRMI_official'}
     
     #Light directory
-    mask_dirs = {'SFBHI': 'Datasets/SFBHI/Labels/', 
-                 'GlaS': 'Datasets/GlaS/',
-                 'PRMI': 'Datasets/PRMI/PRMI_official'}
+    mask_dirs = {'SFBHI':true_dir+ 'Datasets/SFBHI/Labels/', 
+                 'GlaS': true_dir+'Datasets/GlaS/',
+                 'PRMI': true_dir+'Datasets/PRMI/PRMI_official'}
         
     #Number of classes in each dataset
     num_classes = {'SFBHI': 1, 

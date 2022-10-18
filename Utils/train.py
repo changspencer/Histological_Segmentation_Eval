@@ -90,6 +90,7 @@ def train_net(net,device,indices,split,Network_parameters,epochs=5,
    
     #Set optimizer
     optimizer = optim.Adam(net.parameters(),lr=lr,weight_decay=1e-8)
+    # optimizer = optim.SGD(net.parameters(), lr=lr, weight_decay=1e-5, momentum=0.9)
     
     #Set Early stopping
     early_stopping = EarlyStopping(patience=10, verbose=True)
@@ -163,9 +164,10 @@ def train_net(net,device,indices,split,Network_parameters,epochs=5,
                         
                         else:
                             # Bootstrapping with masked sampling, arbitrary threshold value
-                            ohem_mask = ((torch.sigmoid(masks_pred) > .45) * 
-                                         (torch.sigmoid(masks_pred) < .55)).float().detach()
-                            loss = criterion(masks_pred * ohem_mask, true_masks) #Target should be NxCxHxW
+                            # ohem_mask = ((torch.sigmoid(masks_pred) > .45) * 
+                            #              (torch.sigmoid(masks_pred) < .55)).float().detach()
+                            # loss = criterion(masks_pred * ohem_mask, true_masks) #Target should be NxCxHxW
+                            loss = criterion(masks_pred, true_masks)
                             
                         #Aggregate loss for epoch
                         epoch_loss += loss.item() * imgs.size(0)

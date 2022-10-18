@@ -211,9 +211,10 @@ class RootsDataset(Dataset):
         
         # Get specific filename (not filepath)
         img_file = datafiles["img"]
-        img_name = img_file.rsplit('/',1)[-1].rsplit('.',1)[0]
-        if img_name is not list:
-            img_name = img_file.rsplit('\\',1)[-1].rsplit('.',1)[0]
+        # img_name = img_file.rsplit('/',1)[-1].rsplit('.',1)[0]
+        # if img_name is not list:
+        #     img_name = img_file.rsplit('\\',1)[-1].rsplit('.',1)[0]
+        img_name = pathlib.PurePath(img_file).name
 
         if self.mode == 'RGB':
             img = Image.open(img_file).convert('RGB')

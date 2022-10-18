@@ -9,7 +9,7 @@ from __future__ import print_function
 from __future__ import division
 import csv
 import pdb
-from os.path import join
+from os.path import join, abspath, dirname
 import pdb
 
 from Utils.dataset import RootsDataset
@@ -94,12 +94,19 @@ def Prepare_DataLoaders(Network_parameters, splits, data_type='time'):
         val_indices = []
         test_indices = []
         # I'd like to avoid "double loading" this dataset in the future
+        imgs_dir = abspath(dirname(__file__)) + "/" + imgs_dir
         train_set = RootsDataset(root=imgs_dir + "/train")
         val_set = RootsDataset(root=imgs_dir + "/val")
         test_set = RootsDataset(root=imgs_dir + "/test")
         train_indices.append([i for i in range(len(train_set))])
         val_indices.append([i for i in range(len(val_set))])
         test_indices.append([i for i in range(len(test_set))])
+        print("Data: {}, {}, {}".format(len(train_set),
+                                        len(val_set),
+                                        len(test_set)))
+        print("Data: {}, {}, {}".format(len(train_indices[0]),
+                                        len(val_indices[0]),
+                                        len(test_indices[0])))
     
     #Generate indices (img files) for training, validation, and test
     indices = {'train': train_indices, 'val': val_indices, 'test': test_indices}

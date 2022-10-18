@@ -49,7 +49,7 @@ def Get_Dataloaders(split,indices,Network_parameters,batch_size):
                                                           split=split,
                                                           augment=Network_parameters['augment'],
                                                           rotate=Network_parameters['rotate'],
-                                                          patch_size=400)
+                                                          patch_size=640)
        
         #Get postive weight (for histological fat images only)
         pos_wt = 1
@@ -194,4 +194,7 @@ def load_PRMI(data_path, batch_size, num_workers, pin_memory=True,
         worker_init_fn=seed_worker
     )
     
+    print("Loader results: {}, {}, {}".format(len(train_loader),
+                                              len(valid_loader),
+                                              len(test_loader)))
     return train_loader, valid_loader, test_loader

@@ -59,7 +59,7 @@ def Generate_Images(dataloaders,mask_type,seg_models,device,split,
     
     hausdorff_pytorch = HausdorffDistance()
     for phase in ['val','test']:
-    
+        print(f"{phase} Image Phase: {len(dataloaders[phase])} images")
         img_count = 0
         for batch in dataloaders[phase]:
            

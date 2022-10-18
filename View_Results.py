@@ -10,6 +10,7 @@ dictionary to only include models of interests
 
 ## Python standard libraries
 from __future__ import print_function
+from os import path
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -72,6 +73,7 @@ def main(Params,args):
     
     #Return datasets and indices of training/validation data
     indices = Prepare_DataLoaders(Params,numRuns,data_type=args.data_split)
+    print(Params)
     
     mask_type = torch.float32 if num_classes == 1 else torch.long
     
@@ -79,8 +81,9 @@ def main(Params,args):
     Get_Metrics(metrics,seg_models,args,folds=numRuns)
     
     #Load dataframe containing fat and label information
-    fat_df = pd.read_excel(r'Labeled Image Reference Length.xls')
-    labels_df = pd.read_excel(r'Image Name, Week, and Condition.xls')
+    true_dir = path.abspath(path.dirname(__file__)) + "/"
+    fat_df = pd.read_excel(true_dir + r'Labeled Image Reference Length.xls')
+    labels_df = pd.read_excel(true_dir + r'Image Name, Week, and Condition.xls')
    
     #Generate spreadsheet with fat information
     folder = (Params['folder'] + '/'+ Params['mode'] 
