@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 import sys
+import datetime
 
 import numpy as np
 import torch
@@ -43,14 +44,27 @@ def Generate_Dir_Name(split,Network_parameters):
                     + '/' + Network_parameters['Dataset'] + '/' +
                     Network_parameters['Model_name']
                     + '/Summary/')   
-        
+
     #Make save directory
+    now_time = datetime.datetime.now()
+    time_str = "_{}{}{}_{}{}{}".format(now_time.year,
+                                        now_time.month,
+                                        now_time.day,
+                                        now_time.hour,
+                                        now_time.minute,
+                                        now_time.second)
     if not os.path.exists(filename):
         os.makedirs(filename)
-        
+    else:
+        os.rename(filename, filename[:-1] + time_str + '/')
+        os.makedirs(filename)
+
     if not os.path.exists(summaryname):
         os.makedirs(summaryname)
-        
+    else:
+        os.rename(summaryname, summaryname[:-1] + time_str + '/')
+        os.makedirs(summaryname)
+
     return filename,summaryname
 
 def train_net(net,device,indices,split,Network_parameters,epochs=5,
