@@ -21,7 +21,7 @@ def initialize_model(model_name, num_classes, Network_parameters,
                     analyze=False, comet_exp=None):
  
     #Generate segmentation model 
-    if (model_name == 'JOSHUA') or (model_name == 'JOSHUA+'):
+    if (model_name == 'JOSHUA') or (model_name == 'JOSHUA+') or (model_name == 'JOSHUAres'):
             model = JOSHUA(Network_parameters['channels'],num_classes,
                              skip=Network_parameters['histogram_skips'],
                              pool=Network_parameters['histogram_pools'],
@@ -34,7 +34,8 @@ def initialize_model(model_name, num_classes, Network_parameters,
                              use_attention=Network_parameters['use_attention'],
                              feature_extraction=Network_parameters['feature_extraction'],
                              add_bn=Network_parameters['add_bn'],
-                             analyze=analyze)
+                             analyze=analyze,
+                             parallel=Network_parameters['parallel_skips'])
             
     #PRMI UNET model for the roots segmentation (our version of attention)
     # elif (model_name == 'UNET') and Network_parameters['Dataset'] == 'PRMI': 

@@ -23,10 +23,11 @@ def Parameters(args):
     # 'JOSHUA+'
     model = args.model
     
-    seg_models = {'UNET': 0,'UNET+': 1, 'Attention_UNET': 2, 'JOSHUA': 3, 'JOSHUA+': 4}
+    seg_models = {'UNET': 0,'UNET+': 1, 'Attention_UNET': 2,
+                  'JOSHUA': 3, 'JOSHUA+': 4, 'JOSHUAres': 5}
     #model_selection = {0: 1, 1: 1, 2: 4, 3: 1, 4: 1}
-    hist_skips = {0: False, 1: False, 2: False, 3: True, 4:True}
-    attention = {0: False, 1: True, 2: True, 3: False, 4: True}
+    hist_skips = {0: False, 1: False, 2: False, 3: True, 4: True, 5: True}
+    attention = {0: False, 1: True, 2: True, 3: False, 4: True, 5: False}
     
     #Flag for to save out model at certain checkpoints (default: every 5 epochs)
     #Set to True to save results out and False to not save results
@@ -37,12 +38,15 @@ def Parameters(args):
     #Always add slash (/) after folder name
     folder = args.folder
     
-    #Flag to use histogram model(s) or baseline UNET model
+    # Flag to use histogram model(s) or baseline UNET model
     # Set either to True to use histogram layer(s) and both to False to use baseline model 
-    #Use histogram(s) as attention mechanism, set to True
+    # Use histogram(s) as attention mechanism, set to True
     histogram_skips = hist_skips[seg_models[model]]
-    histogram_pools = False
+    histogram_pools = False  # Use histogram pooling for DownConvs
     use_attention = attention[seg_models[model]]
+
+    # Create histogram features in parallel on shortcuts
+    parallel_skips = True if seg_models[model] == 5 else False
     
     #Location at which to apply histogram layer(s) for skip connections and/or pooling
     #Will need to set to True to add histogram layer and False to not add histogram layer
@@ -205,10 +209,11 @@ def Parameters(args):
                           'Parallelize_model': parallelize_model,
                           'histogram_skips': histogram_skips,
                           'histogram_pools': histogram_pools,
+                          'parallel_skips': parallel_skips,
                           'skip_locations': skip_locations, 'channels': channels,
                           'pool_locations': pool_locations, 'bilinear': bilinear,
                           'random_state': random_state, 'save_cp': save_cp,
                           'save_epoch': save_epoch, 'use_attention': use_attention,
                           'augment': augment, 'rotate': rotate, 'show_fat': show_fat,
-                          'use_pretrained': use_pretrained}
+                          'use_pretrained': use_pretrained,}
     return Network_parameters

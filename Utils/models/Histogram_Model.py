@@ -20,12 +20,14 @@ class JOSHUA(nn.Module):
                  num_bins=4,normalize_count=True,normalize_bins=True,
                  skip_locations=[True,True,True,True],
                  pool_locations=[True,True,True,True],use_attention=False,
-                 feature_extraction = False, add_bn=True,analyze=False):
+                 feature_extraction = False, add_bn=True,analyze=False,
+                 parallel=False):
         
         #inherit nn.module
         super(JOSHUA,self).__init__()
         self.skip_locations = skip_locations
         self.pool_locations = pool_locations
+        self.parallel_hist = parallel
         
         self.n_channels = n_channels
         self.n_classes = n_classes
@@ -70,25 +72,29 @@ class JOSHUA(nn.Module):
                               normalize_bins=normalize_bins,
                               use_hist=skip_locations[0],
                               use_attention=use_attention,
-                              add_bn=add_bn)
+                              add_bn=add_bn,
+                              parallel=self.parallel_hist)
             self.up2 = UpHist(512, 256, num_bins, bilinear=bilinear,
                               normalize_count=normalize_count, 
                               normalize_bins=normalize_bins,
                               use_hist=skip_locations[1],
                               use_attention=use_attention,
-                              add_bn=add_bn)
+                              add_bn=add_bn,
+                              parallel=self.parallel_hist)
             self.up3 = UpHist(256, 128, num_bins, bilinear=bilinear,
                               normalize_count=normalize_count, 
                               normalize_bins=normalize_bins,
                               use_hist=skip_locations[2],
                               use_attention=use_attention,
-                              add_bn=add_bn)
+                              add_bn=add_bn,
+                              parallel=self.parallel_hist)
             self.up4 = UpHist(128, 64 * factor, num_bins, bilinear,
                               normalize_count=normalize_count, 
                               normalize_bins=normalize_bins,
                               use_hist=skip_locations[3],up4=True,
                               use_attention=use_attention,
-                              add_bn=add_bn,analyze=self.analyze)        
+                              add_bn=add_bn,analyze=self.analyze,
+                              parallel=self.parallel_hist)
         else:
             self.up1 = Up(1024, 512, bilinear)
             self.up2 = Up(512, 256, bilinear)

@@ -108,16 +108,20 @@ class UpHist(nn.Module):
 
     def __init__(self, in_channels, out_channels, num_bins,bilinear=True,
                  normalize_count=True,normalize_bins = True,use_hist=True,
-                 up4=False,use_attention=False,add_bn=False,analyze=False):
+                 up4=False,use_attention=False,add_bn=False,analyze=False,
+                 parallel=False):
         super().__init__()
 
         self.use_attention = use_attention
         self.analyze = analyze
+        self.parallel_hist = parallel
         # if bilinear, use the normal convolutions to reduce the number of channels
         if bilinear:
             self.up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
             if self.use_attention:
                 self.conv = DoubleConv(in_channels // 2, out_channels // 2, in_channels // 2)
+            elif self.parallel_hist:
+                self.conv = DoubleConv(3 * in_channels // 2, out_channels // 2, in_channels // 2)
             else:
                 self.conv = DoubleConv(in_channels, out_channels // 2, in_channels // 2)
         else:
@@ -125,6 +129,8 @@ class UpHist(nn.Module):
                                              kernel_size=2, stride=2)
             if self.use_attention:
                 self.conv = DoubleConv(in_channels // 2, out_channels)
+            elif self.parallel_hist:
+                self.conv = DoubleConv(3 * in_channels // 2, out_channels // 2, in_channels // 2)
             else:
                 self.conv = DoubleConv(in_channels, out_channels)
 
@@ -189,16 +195,17 @@ class UpHist(nn.Module):
         # https://github.com/xiaopeng-liao/Pytorch-UNet/commit/8ebac70e633bac59fc22bb5195e513d5832fb3bd
         
         #Pass feature maps from encoder branch through histogram layer 
-        x2 = self.hist_skip(x2)
+        x3 = self.hist_skip(x2)
         
         if self.use_attention:
-            x = x2*x1
+            x = x3*x1
+        elif self.parallel_hist:
+            x = torch.cat([x3, x2, x1], dim=1)
         else:
-            x = torch.cat([x2, x1], dim=1)
+            x = torch.cat([x3, x1], dim=1)
             
         if self.analyze:
-            return x2, self.conv(x)
-        
+            return x3, self.conv(x)
         else:
             return self.conv(x)
 
