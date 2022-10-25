@@ -68,7 +68,8 @@ def Generate_Images(dataloaders,mask_type,seg_models,device,split,
             imgs = imgs.to(device=device, dtype=torch.float32)
             true_masks = true_masks.to(device=device, dtype=mask_type)
            
-            for img in range(0,imgs.size(0)):
+            # for img in range(0,imgs.size(0)):
+            for img in range(0, 1):  # Limit number of outputs to expedite eval
         
                 #Create figure for each image
                 temp_fig, temp_ax = plt.subplots(nrows=1,ncols=len(seg_models)+2,figsize=(16,8))
