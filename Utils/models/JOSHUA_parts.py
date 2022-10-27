@@ -199,8 +199,9 @@ class UpHist(nn.Module):
         
         if self.use_attention:
             x = x3*x1
-        elif self.parallel_hist:
+        elif self.parallel_hist:  # Original ResNet shortcut used addition
             x = torch.cat([x3, x2, x1], dim=1)
+            # x = torch.cat([x3 + x2, x1], dim=1)
         else:
             x = torch.cat([x3, x1], dim=1)
             

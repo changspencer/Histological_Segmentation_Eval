@@ -326,7 +326,9 @@ def train_net(net,device,indices,split,Network_parameters,epochs=5,
             best_model = net
             best_model = net
             val_metrics = val_dict
+
             print(f"Saving best {Network_parameters['Model_name']} model...")
+            torch.save(best_wts, dir_name + 'best_wts.pt')
             
          #Early stop once loss stops improving
         if early_stopping.early_stop:
@@ -353,7 +355,7 @@ def train_net(net,device,indices,split,Network_parameters,epochs=5,
     text_file = open(dir_name+'Run_Time.txt','w')
     n = text_file.write('Training complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
     text_file.close()
-    text_file = open(dir_name+'Training_Weight.text','w')
+    text_file = open(dir_name+'Training_Weight.txt','w')
     n = text_file.write('Training Positive Weight: ' + str(pos_wt))
     print('Training complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
     
