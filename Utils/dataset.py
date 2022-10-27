@@ -171,17 +171,33 @@ class RootsDataset(Dataset):
     Some changes have been made to adapt it to Josh's Histological Segmentation code.
     """
     def __init__(self, root, mode='RGB', img_transform=None, label_transform=None):
+        self.class_list = [
+            'Cotton',
+            'Papaya',
+            'Peanut',
+            'Sesame',
+            'Sunflower',
+            'Switchgrass'
+        ]
         self.root = root
         self.mode = mode
         self.img_transform = img_transform
         self.label_transform = label_transform
         self.files = []
 
+        self.class_count = np.zeros(len(self.class_list), dtype=np.int)
         imgdir = os.path.join(self.root, 'images')
 
         for os_root, dirs, files in os.walk(imgdir):
             if os_root.find("_noMask") > -1:
                 continue
+
+            curr_class_idx = 0
+            for class_idx in range(len(self.class_list)):
+                if self.class_list[class_idx] in os_root:
+                    curr_class_idx = class_idx
+                    break
+
             for name in files:
                 if name != "placeholder.file":
                     imgpath = os.path.join(os_root, name)
@@ -202,6 +218,16 @@ class RootsDataset(Dataset):
                             "img": imgpath,
                             "label": labelpath.replace(ending, '.png')
                         })
+                    self.class_count[curr_class_idx] += 1
+
+        # Increase the number of times an underrepresented class is sampled
+        file_idx = 0
+        self.sample_weights = np.zeros(self.class_count.sum())
+        for count in self.class_count:
+            class_weight = 0 if count == 0 else self.class_count.max() / count
+
+            self.sample_weights[file_idx:file_idx + count] = class_weight
+            file_idx += count
 
     def __len__(self):     
         return len(self.files)
@@ -231,7 +257,7 @@ class RootsDataset(Dataset):
 
         torch.set_rng_state(state)
         if self.label_transform is not None:
-            label = self.label_transform(label)  
+            label = self.label_transform(label)
 
         label = np.array(label)
 
