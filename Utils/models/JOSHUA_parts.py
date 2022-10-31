@@ -120,8 +120,8 @@ class UpHist(nn.Module):
             self.up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
             if self.use_attention:
                 self.conv = DoubleConv(in_channels // 2, out_channels // 2, in_channels // 2)
-            elif self.parallel_hist:
-                self.conv = DoubleConv(3 * in_channels // 2, out_channels // 2, in_channels // 2)
+            # elif self.parallel_hist:
+            #     self.conv = DoubleConv(3 * in_channels // 2, out_channels // 2, in_channels // 2)
             else:
                 self.conv = DoubleConv(in_channels, out_channels // 2, in_channels // 2)
         else:
@@ -129,8 +129,8 @@ class UpHist(nn.Module):
                                              kernel_size=2, stride=2)
             if self.use_attention:
                 self.conv = DoubleConv(in_channels // 2, out_channels)
-            elif self.parallel_hist:
-                self.conv = DoubleConv(3 * in_channels // 2, out_channels // 2, in_channels // 2)
+            # elif self.parallel_hist:
+            #     self.conv = DoubleConv(3 * in_channels // 2, out_channels // 2, in_channels // 2)
             else:
                 self.conv = DoubleConv(in_channels, out_channels)
 
@@ -200,8 +200,8 @@ class UpHist(nn.Module):
         if self.use_attention:
             x = x3*x1
         elif self.parallel_hist:  # Original ResNet shortcut used addition
-            x = torch.cat([x3, x2, x1], dim=1)
-            # x = torch.cat([x3 + x2, x1], dim=1)
+            # x = torch.cat([x3, x2, x1], dim=1)
+            x = torch.cat([x3 + x2, x1], dim=1)
         else:
             x = torch.cat([x3, x1], dim=1)
             
