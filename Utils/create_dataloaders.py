@@ -5,6 +5,7 @@ Generate Dataloaders
 @author: jpeeples
 """
 from torch.utils.data import DataLoader
+from torch.utils.data import WeightedRandomSampler
 import torch
 from torchvision import transforms
 from .utils import ExpandedRandomSampler
@@ -162,13 +163,20 @@ def load_PRMI(data_path, batch_size, num_workers, pin_memory=True,
     # Mask transforms: resizing only
     gt_transforms = transforms.Compose(resize_transform +
                                        [transforms.ToTensor()])
-    
+
+    # Have a uniform sampling of classes for each batch
+    train_dataset = RootsDataset(
+        root=data_path + "/train",
+        img_transform=transforms.Compose(train_transform),
+        label_transform=gt_transforms,
+    )
+    train_sampler = WeightedRandomSampler(train_dataset.sample_weights,
+                                          batch_size['train'],
+                                          replacement=True)
+
     train_loader = DataLoader(
-        RootsDataset(
-            root=data_path + "/train",
-            img_transform=transforms.Compose(train_transform),
-            label_transform=gt_transforms,
-        ),
+        train_dataset,
+        sampler=train_sampler,
         batch_size=batch_size['train'],
         num_workers=num_workers,
         pin_memory=pin_memory,
