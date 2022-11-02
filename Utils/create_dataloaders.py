@@ -171,8 +171,8 @@ def load_PRMI(data_path, batch_size, num_workers, pin_memory=True,
         label_transform=gt_transforms,
     )
     train_sampler = WeightedRandomSampler(train_dataset.sample_weights,
-                                          batch_size['train'],
-                                          replacement=True)
+                                          len(train_dataset.files),
+                                          replacement=False)
 
     train_loader = DataLoader(
         train_dataset,
@@ -180,7 +180,8 @@ def load_PRMI(data_path, batch_size, num_workers, pin_memory=True,
         batch_size=batch_size['train'],
         num_workers=num_workers,
         pin_memory=pin_memory,
-        drop_last=True,worker_init_fn=seed_worker
+        drop_last=True,
+        worker_init_fn=seed_worker
     )
     valid_loader = DataLoader(
         RootsDataset(root=data_path + "/val",
