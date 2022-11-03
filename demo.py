@@ -41,13 +41,16 @@ except:
 plt.ioff()
 
 def main(Params, args):
-    # #Reproducibility
-    torch.manual_seed(Params['random_state'])
-    np.random.seed(Params['random_state'])
-    random.seed(Params['random_state'])
-    torch.cuda.manual_seed(Params['random_state'])
-    torch.cuda.manual_seed_all(Params['random_state'])
-    
+    # Reproducibility and option for cross-validation runs (no initial seed)
+    if Params['random_state'] > 0:
+        torch.manual_seed(Params['random_state'])
+        np.random.seed(Params['random_state'])
+        random.seed(Params['random_state'])
+        torch.cuda.manual_seed(Params['random_state'])
+        torch.cuda.manual_seed_all(Params['random_state'])
+    else:
+        print(f"Initial Torch seed: {torch.seed()}")
+        
     #Name of dataset
     Dataset = Params['Dataset']
     
@@ -89,7 +92,7 @@ def main(Params, args):
                 project_name=proj_name,
                 workspace="changspencer",
             )
-            experiment.set_name(f"{Dataset}-{model_name}-{split+1}")
+            experiment.set_name(f"TEST-{Dataset}-{model_name}-{split+1}")
         
         print('Starting Experiments...')
         if experiment is not None:
@@ -176,16 +179,16 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Run segmentation models for dataset')
     parser.add_argument('--save_results', type=bool, default=True,
                         help='Save results of experiments(default: True')
-    parser.add_argument('--save_cp', type=bool, default=False,
+    parser.add_argument('--save_cp', type=bool, default=True,
                         help='Save results of experiments at each checkpoint (default: False)')
     parser.add_argument('--save_epoch', type=int, default=5,
                         help='Epoch for checkpoint (default: 5')
     parser.add_argument('--folder', type=str, default='Saved_Models/',
                         help='Location to save models')
-    parser.add_argument('--model', type=str, default='JOSHUA+',
-                        help='Select model to train with (default: JOSHUA+')
+    parser.add_argument('--model', type=str, nargs="+", default=['UNET'],
+                        help='Select models to train with (UNET, UNET+, Attention_UNET, JOSHUA, JOSHUA+, JOSHUAres) default: [UNET]')
     parser.add_argument('--data_selection', type=int, default=1,
-                        help='Dataset selection:  1: SFBHI, 2: GlaS, 3: PRMI')
+                        help='Dataset selection:  1: SFBHI, 2: GlaS, 3: PRMI, 4: Peanut_PRMI')
     parser.add_argument('--channels', type=int, default=3,
                         help='Input channels of network (default: 3, RGB images)')
     parser.add_argument('--bilinear', type=bool, default=True,
@@ -230,15 +233,16 @@ def parse_args():
                         help='enables CUDA training')
     parser.add_argument('--use-cuda', action='store_true', default=True,
                         help='enables CUDA training')
+    parser.add_argument('--num_seeds', type=int, default=1,
+                        help='Number of random weight initializations and training runs')
     args = parser.parse_args()
     return args
 
 if __name__ == "__main__":
     
     #Trains all models
-    # model_list = ['JOSHUA+','UNET','UNET+','Attention_UNET', 'JOSHUA']
-    model_list = ['UNET']
     args = parse_args()
+    model_list = args.model
     args.folder = os.path.join(os.path.dirname(__file__), args.folder)
 
     model_count = 0

@@ -88,7 +88,7 @@ def Prepare_DataLoaders(Network_parameters, splits, data_type='time'):
 
 
    #Glas Dataset
-    elif Dataset == 'PRMI':
+    elif Dataset in ['PRMI', 'Peanut_PRMI']:
         #Get files for each fold - For now, I'm not using any folds here.
         train_indices = []
         val_indices = []
@@ -101,12 +101,7 @@ def Prepare_DataLoaders(Network_parameters, splits, data_type='time'):
         train_indices.append([i for i in range(len(train_set))])
         val_indices.append([i for i in range(len(val_set))])
         test_indices.append([i for i in range(len(test_set))])
-        print("Data: {}, {}, {}".format(len(train_set),
-                                        len(val_set),
-                                        len(test_set)))
-        print("Data: {}, {}, {}".format(len(train_indices[0]),
-                                        len(val_indices[0]),
-                                        len(test_indices[0])))
+        print("*** PRMI Dataset acknowledged...")
     
     #Generate indices (img files) for training, validation, and test
     indices = {'train': train_indices, 'val': val_indices, 'test': test_indices}

@@ -170,7 +170,9 @@ class RootsDataset(Dataset):
     Sourced from the GatorSense/EZNET GitHub Repository for working with PRMI data.
     Some changes have been made to adapt it to Josh's Histological Segmentation code.
     """
-    def __init__(self, root, mode='RGB', img_transform=None, label_transform=None):
+    def __init__(self, root, mode='RGB', img_transform=None, label_transform=None,
+                 subset:list=None):
+
         self.class_list = [
             'Cotton',
             'Papaya',
@@ -179,6 +181,9 @@ class RootsDataset(Dataset):
             'Sunflower',
             'Switchgrass'
         ]
+        if subset is not None:
+            self.class_list = subset
+
         self.root = root
         self.mode = mode
         self.img_transform = img_transform
@@ -192,33 +197,39 @@ class RootsDataset(Dataset):
             if os_root.find("_noMask") > -1:
                 continue
 
-            curr_class_idx = 0
+            curr_class_idx = None
             for class_idx in range(len(self.class_list)):
                 if self.class_list[class_idx] in os_root:
                     curr_class_idx = class_idx
                     break
 
-            for name in files:
-                if name != "placeholder.file":
-                    imgpath = os.path.join(os_root, name)
+            # The subset of classes does not include 'os_root'
+            if curr_class_idx is None:
+                continue
 
-                    rootp = pathlib.Path(os_root)
-                    index = rootp.parts.index('images')
-                    labelpath = os.path.join(self.root, 'masks_pixel_gt', *rootp.parts[index+1:])
-                    labelpath = os.path.join(labelpath, f"GT_{name}")
-                    # Label name validation
-                    if labelpath.endswith('.png'):
-                        self.files.append({
-                            "img": imgpath,
-                            "label": labelpath
-                        })
-                    else:
-                        ending = '.' + labelpath.split('.')[-1]
-                        self.files.append({
-                            "img": imgpath,
-                            "label": labelpath.replace(ending, '.png')
-                        })
-                    self.class_count[curr_class_idx] += 1
+            for name in files:
+                if name == "placeholder.file":
+                    continue
+
+                imgpath = os.path.join(os_root, name)
+
+                rootp = pathlib.Path(os_root)
+                index = rootp.parts.index('images')
+                labelpath = os.path.join(self.root, 'masks_pixel_gt', *rootp.parts[index+1:])
+                labelpath = os.path.join(labelpath, f"GT_{name}")
+                # Label name validation
+                if labelpath.endswith('.png'):
+                    self.files.append({
+                        "img": imgpath,
+                        "label": labelpath
+                    })
+                else:
+                    ending = '.' + labelpath.split('.')[-1]
+                    self.files.append({
+                        "img": imgpath,
+                        "label": labelpath.replace(ending, '.png')
+                    })
+                self.class_count[curr_class_idx] += 1
 
         # Increase the number of times an underrepresented class is sampled
         file_idx = 0
@@ -237,9 +248,6 @@ class RootsDataset(Dataset):
         
         # Get specific filename (not filepath)
         img_file = datafiles["img"]
-        # img_name = img_file.rsplit('/',1)[-1].rsplit('.',1)[0]
-        # if img_name is not list:
-        #     img_name = img_file.rsplit('\\',1)[-1].rsplit('.',1)[0]
         img_name = pathlib.PurePath(img_file).name.rsplit('.', 1)[0]
 
         if self.mode == 'RGB':
@@ -251,6 +259,11 @@ class RootsDataset(Dataset):
         label_file = datafiles["label"]
         label = Image.open(label_file).convert("1")
 
+        # Have the longer side always put first
+        if img.size[0] < img.size[1]:
+            img = img.transpose(method=Image.ROTATE_90)
+            label = label.transpose(method=Image.ROTATE_90)
+
         state = torch.get_rng_state()
         if self.img_transform is not None:
             img = self.img_transform(img)
@@ -258,7 +271,8 @@ class RootsDataset(Dataset):
         torch.set_rng_state(state)
         if self.label_transform is not None:
             label = self.label_transform(label)
-
         label = np.array(label)
 
+        # Need to flip PRMI roots labeling (make 0 be soil)
+        label = -label + label.max()
         return {'image':img, 'mask': label, 'index': img_name, 'label': label_file}

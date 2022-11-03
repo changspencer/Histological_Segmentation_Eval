@@ -54,6 +54,19 @@ def Get_Dataloaders(split,indices,Network_parameters,batch_size):
        
         #Get postive weight (for histological fat images only)
         pos_wt = 1
+        
+    elif Network_parameters['Dataset'] == 'Peanut_PRMI':
+        train_loader, val_loader, test_loader = load_PRMI(Network_parameters['imgs_dir'],
+                                                          batch_size,
+                                                          Network_parameters['num_workers'],
+                                                          split=split,
+                                                          augment=Network_parameters['augment'],
+                                                          rotate=Network_parameters['rotate'],
+                                                          patch_size=640,
+                                                          data_subset=['Peanut'])
+       
+        #Get postive weight (for histological fat images only)
+        pos_wt = 1
        
     dataloaders = {'train': train_loader, 'val': val_loader, 'test': test_loader}
     
@@ -145,23 +158,25 @@ def load_SFBHI(data_path,indices, batch_size, num_workers, pin_memory=True,
 
 
 def load_PRMI(data_path, batch_size, num_workers, pin_memory=True,
-              split=0, patch_size=640, sampler_mul=8, augment=False, rotate=False):
+              split=0, patch_size=640, sampler_mul=8, augment=False, rotate=False,
+              data_subset=None):
 
     # Resize to some 4:3 ratio because PRMI data is in 4:3 ratio.
-    resize_transform = [transforms.Resize((patch_size, patch_size * 3 // 4))]
+    # resize_transform = [transforms.Resize((patch_size, patch_size * 3 // 4))]
+    crop_transform = [transforms.RandomResizedCrop((patch_size, patch_size * 3 // 4))]
     # Train data transforms: Resizing and maybe some data augmentation
     if augment:
-        train_transform = resize_transform + [
+        train_transform = crop_transform + [
             # transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.05),
             transforms.ToTensor(),
         ]
     else:
-        train_transform = resize_transform + [transforms.ToTensor()]
+        train_transform = crop_transform + [transforms.ToTensor()]
     # Test data transforms: resizing only
-    test_transform = transforms.Compose(resize_transform +
+    test_transform = transforms.Compose(crop_transform +
                                         [transforms.ToTensor()])
     # Mask transforms: resizing only
-    gt_transforms = transforms.Compose(resize_transform +
+    gt_transforms = transforms.Compose(crop_transform +
                                        [transforms.ToTensor()])
 
     # Have a uniform sampling of classes for each batch
@@ -169,6 +184,7 @@ def load_PRMI(data_path, batch_size, num_workers, pin_memory=True,
         root=data_path + "/train",
         img_transform=transforms.Compose(train_transform),
         label_transform=gt_transforms,
+        subset=data_subset
     )
     train_sampler = WeightedRandomSampler(train_dataset.sample_weights,
                                           len(train_dataset.files),
@@ -186,7 +202,8 @@ def load_PRMI(data_path, batch_size, num_workers, pin_memory=True,
     valid_loader = DataLoader(
         RootsDataset(root=data_path + "/val",
                      img_transform=test_transform,
-                     label_transform=gt_transforms),
+                     label_transform=gt_transforms,
+                     subset=data_subset),
         batch_size=batch_size['val'],
         num_workers=num_workers,
         shuffle=False,
@@ -196,14 +213,15 @@ def load_PRMI(data_path, batch_size, num_workers, pin_memory=True,
     test_loader = DataLoader(
         RootsDataset(root=data_path + "/test",
                      img_transform=test_transform,
-                     label_transform=gt_transforms),
+                     label_transform=gt_transforms,
+                     subset=data_subset),
         batch_size=batch_size['test'],
         num_workers=num_workers,
         pin_memory=pin_memory,
         worker_init_fn=seed_worker
     )
     
-    print("Loader results: {}, {}, {}".format(len(train_loader),
-                                              len(valid_loader),
-                                              len(test_loader)))
+    print("Dataloader results: {}, {}, {}".format(len(train_loader),
+                                                  len(valid_loader),
+                                                  len(test_loader)))
     return train_loader, valid_loader, test_loader

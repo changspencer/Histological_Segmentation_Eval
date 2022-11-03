@@ -56,7 +56,7 @@ def Parameters(args):
     
     #Select dataset. Set to number of desired segmentation dataset
     data_selection = args.data_selection
-    Dataset_names = { 1: 'SFBHI', 2: 'GlaS', 3: 'PRMI'}
+    Dataset_names = { 1: 'SFBHI', 2: 'GlaS', 3: 'PRMI', 4: 'Peanut_PRMI'}
     
     #If SFBHI, generate images with adipose tissue graphs
     if data_selection == 1:
@@ -84,7 +84,7 @@ def Parameters(args):
     center_size = args.center_size
     
     #Number of folds for K fold CV
-    fold_datasets = {1: 5, 2: 5, 3: 1}
+    fold_datasets = {1: 5, 2: 5, 3: 1, 4: 1}
     folds = fold_datasets[args.data_selection]
     
     #Set random state for K fold CV for repeatability of data/model initialization
@@ -151,28 +151,33 @@ def Parameters(args):
     #Location of segmentation datasets (images and masks)
     img_dirs = {'SFBHI': true_dir + 'Datasets/SFBHI/Images/', 
                 'GlaS':  true_dir +'Datasets/GlaS/',
-                'PRMI':  true_dir +'Datasets/PRMI/PRMI_official'}
+                'PRMI':  true_dir +'Datasets/PRMI/PRMI_official',
+                'Peanut_PRMI':  true_dir +'Datasets/PRMI/PRMI_official'}
     
     #Light directory
     mask_dirs = {'SFBHI':true_dir+ 'Datasets/SFBHI/Labels/', 
                  'GlaS': true_dir+'Datasets/GlaS/',
-                 'PRMI': true_dir+'Datasets/PRMI/PRMI_official'}
+                 'PRMI': true_dir+'Datasets/PRMI/PRMI_official',
+                 'Peanut_PRMI': true_dir+'Datasets/PRMI/PRMI_official'}
         
     #Number of classes in each dataset
     num_classes = {'SFBHI': 1, 
                   'GlaS': 1,
-                  'PRMI': 1}  # only binary root segmentation
+                  'PRMI': 1,
+                  'Peanut_PRMI': 1}  # only binary root segmentation
     
     #Number of runs and/or splits for each dataset (5 fold)
     #For SFBHI, should be 5 unless "time" split (4)
     if (args.data_split == 'Time_Folds') or (args.data_split == 'Val_Week_8'):
         Splits = {'SFBHI': 4, 
                   'GlaS': 5,
-                  'PRMI': 1}
+                  'PRMI': args.num_seeds,
+                  'Peanut_PRMI': args.num_seeds}
     else:
         Splits = {'SFBHI': 5, 
                   'GlaS': 5,
-                  'PRMI': 1}
+                  'PRMI': args.num_seeds,
+                  'Peanut_PRMI': args.num_seeds}
 
     Dataset = Dataset_names[data_selection]
     imgs_dir = img_dirs[Dataset]

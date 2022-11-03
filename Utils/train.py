@@ -33,7 +33,8 @@ def Generate_Dir_Name(split,Network_parameters):
                     + str(split + 1) + '/')
         summaryname = (Network_parameters['folder'] + '/' + Network_parameters['mode'] 
                     + '/' + Network_parameters['Dataset'] + '/' 
-                    + Network_parameters['hist_model'] + '/Summary/')
+                    + Network_parameters['hist_model']
+                    + '/Summary_' + str(split + 1) + '/')
     #Baseline model
     else:
         filename = (Network_parameters['folder'] + '/'+ Network_parameters['mode'] 
@@ -43,7 +44,7 @@ def Generate_Dir_Name(split,Network_parameters):
         summaryname = (Network_parameters['folder'] + '/'+ Network_parameters['mode'] 
                     + '/' + Network_parameters['Dataset'] + '/' +
                     Network_parameters['Model_name']
-                    + '/Summary/')   
+                    + '/Summary_' + str(split + 1) + '/')   
 
     #Make save directory
     now_time = datetime.datetime.now()
@@ -72,6 +73,9 @@ def train_net(net,device,indices,split,Network_parameters,epochs=5,
               save_results=True,save_epoch=5,dir_checkpoint='checkpoints/',
               comet_exp=None):
     
+    if Network_parameters['Dataset'] in ["PRMI", "Peanut_PRMI"]:
+        split = 0
+
     dir_name,sum_name = Generate_Dir_Name(split, Network_parameters)
     
     since = time.time()
@@ -319,7 +323,7 @@ def train_net(net,device,indices,split,Network_parameters,epochs=5,
                     early_stopping(val_dict['loss'], net)
                 
         
-        #Check dice coefficient and save best model
+        # Check dice coefficient and save best model
         if val_dice_track[epoch] > best_dice:
             best_dice = val_dice_track[epoch]
             best_wts = net.state_dict()
@@ -327,15 +331,9 @@ def train_net(net,device,indices,split,Network_parameters,epochs=5,
             best_model = net
             val_metrics = val_dict
 
-            print(f"Saving best {Network_parameters['Model_name']} model...")
+            print(f"Epoch {epoch}: Saving best {Network_parameters['Model_name']} model...")
             torch.save(best_wts, dir_name + 'best_wts.pt')
-            
-         #Early stop once loss stops improving
-        if early_stopping.early_stop:
-            print()
-            print("Early stopping")
-            break
-        
+
         #Save every save_epoch
         if save_cp and (epoch % save_epoch) == 0:
             try:
@@ -346,6 +344,12 @@ def train_net(net,device,indices,split,Network_parameters,epochs=5,
             torch.save(net.state_dict(),
                        dir_name+dir_checkpoint + f'CP_epoch{epoch + 1}.pth')
             logging.info(f'Checkpoint {epoch + 1} saved !')
+            
+        # Early stop once loss stops improving
+        if early_stopping.early_stop:
+            print()
+            print("Early stopping")
+            break
 
     #Test model on hold out test set - Not saved in Comet logs to avoid indirect training
     test_metrics = eval_net(best_model, dataloaders['test'], device, pos_wt=torch.tensor(pos_wt))
