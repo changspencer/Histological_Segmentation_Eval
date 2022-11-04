@@ -32,7 +32,7 @@ from Utils.Create_Fat_Spreadsheet import Generate_Fat
 plt.ioff()
 
 
-def main(Params,args):
+def main(Params, seg_models, args):
     torch.cuda.empty_cache()
     torch.manual_seed(Params['random_state'])
     np.random.seed(Params['random_state'])
@@ -68,7 +68,7 @@ def main(Params,args):
                    'loss': 'Cross Entropy', 'inf_time': 'Inference Time'}
     
     # seg_models = {0: 'UNET', 1: 'UNET+', 2: 'Attention_UNET', 3:'JOSHUA', 4: 'JOSHUA+'}
-    seg_models = {3: 'JOSHUA', 4: 'JOSHUA+', 5: 'JOSHUAres'}
+    # seg_models = {3: 'JOSHUA', 4: 'JOSHUA+', 5: 'JOSHUAres'}
     
     #Return datasets and indices of training/validation data
     indices = Prepare_DataLoaders(Params,numRuns,data_type=args.data_split)
@@ -119,10 +119,10 @@ def parse_args():
                         help='Epoch for checkpoint (default: 5')
     parser.add_argument('--folder', type=str, default='HPG_Results/Journal_Data_Splits/',
                         help='Location to save models')
-    parser.add_argument('--model', type=str, default='JOSHUA+',
-                        help='Select model to train with (default: JOSHUA+')
-    parser.add_argument('--data_selection', type=int, default=2,
-                        help='Dataset selection:  1: SFBHI, 2: GlaS')
+    parser.add_argument('--model', type=str, nargs="+", default=['UNET'],
+                        help='Select models to train with (UNET, UNET+, Attention_UNET, JOSHUA, JOSHUA+, JOSHUAres) default: [UNET]')
+    parser.add_argument('--data_selection', type=int, default=1,
+                        help='Dataset selection:  1: SFBHI, 2: GlaS, 3: PRMI, 4: Peanut_PRMI')
     parser.add_argument('--channels', type=int, default=3,
                         help='Input channels of network (default: 3, RGB images)')
     parser.add_argument('--bilinear', type=bool, default=True,
@@ -169,13 +169,15 @@ def parse_args():
                 help='Select data split SFBHI: Random (default), Time, Condition')
     parser.add_argument('--week', type=int, default=1,
                         help='Week for new images without labels. (default: 1)')
+    parser.add_argument('--num_seeds', type=int, default=1,
+                        help='Number of training runs to evaluate')
     args = parser.parse_args()
     return args
 
 if __name__ == "__main__":
-    
     args = parse_args()
-    params = Parameters(args)
-    main(params,args)
+    seg_models = args.model
+    setattr(args, 'model', args.model[0])
 
-    
+    params = Parameters(args)
+    main(params, seg_models, args)

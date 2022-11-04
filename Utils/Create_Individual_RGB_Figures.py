@@ -6,6 +6,7 @@ Created on Fri Jan 22 14:46:58 2021
 """
 ## Python standard libraries
 from __future__ import print_function
+from collections import OrderedDict
 import numpy as np
 import matplotlib.pyplot as plt
 import os
@@ -54,8 +55,8 @@ def Generate_Images(dataloaders,mask_type,seg_models,device,split,
     model_names = []
     
     #Set names of models
-    for key in seg_models:
-        model_names.append(seg_models[key])
+    for eval_model in seg_models:
+        model_names.append(eval_model)
     
     hausdorff_pytorch = HausdorffDistance()
     for phase in ['val','test']:
@@ -122,26 +123,47 @@ def Generate_Images(dataloaders,mask_type,seg_models,device,split,
             
                 
                 # Initialize the segmentation model for this run
-                for key_idx, key in enumerate(seg_models):
+                for key_idx, eval_model in enumerate(seg_models):
                     
-                    setattr(args, 'model', seg_models[key])
+                    setattr(args, 'model', eval_model)
                     temp_params = Parameters(args)
-                    model = initialize_model(seg_models[key], num_classes,temp_params)
+                    model = initialize_model(eval_model, num_classes,temp_params)
                     sub_dir, fig_dir = Generate_Dir_Name(split, temp_params)
 
-                    print(" -- Evaluating {} model...".format(seg_models[key]))
+                    print(" -- Evaluating {} model...".format(eval_model))
 
                     #If parallelized, need to set model
                       # Send the model to GPU if available
                     try:
                         model = nn.DataParallel(model)
                         model = model.to(device)
+                        best_weights = torch.load(sub_dir + 'best_wts.pt',
+                                                  map_location=torch.device(device))
+
+                        # Reloaded weights - data validation
+                        best_wts_dict = OrderedDict()
+                        for key in best_weights.keys():
+                            if not key.startswith('module.'):
+                                best_wts_dict['module.' + key] = best_weights[key]
+                            else:
+                                best_wts_dict[key] = best_weights[key]
+
                         model.load_state_dict(torch.load(sub_dir + 'best_wts.pt', 
                                                 map_location=torch.device(device)))
                     except:
                         model = model.to(device)
-                        model.load_state_dict(torch.load(sub_dir + 'best_wts.pt', 
-                                                map_location=torch.device(device)))
+                        best_weights = torch.load(sub_dir + 'best_wts.pt', 
+                                                  map_location=torch.device(device))
+
+                        # Reloaded weights - data validation
+                        best_wts_dict = OrderedDict()
+                        for key in best_weights.keys():
+                            if not key.startswith('module.'):
+                                best_wts_dict['module.' + key] = best_weights[key]
+                            else:
+                                best_wts_dict[key] = best_weights[key]
+
+                        model.load_state_dict(best_wts_dict)
                     
                     #Get location of best weights
                     sub_dir, fig_dir = Generate_Dir_Name(split, temp_params)

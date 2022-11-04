@@ -58,9 +58,9 @@ def Generate_Fat(indices,mask_type,seg_models,device,folds,num_classes,
     model_names.append('Ground Truth')
 
     #Set names of models
-    for key in seg_models:
-        model_names.append(seg_models[key])
-    del key
+    for model in seg_models:
+        model_names.append(model)
+    del model
     
     #Create Training and Validation folder
     if not os.path.exists(folder):
@@ -102,15 +102,15 @@ def Generate_Fat(indices,mask_type,seg_models,device,folds,num_classes,
                     
                     
                     # Initialize the histogram model for this run
-                    for key in seg_models:
+                    for idx, eval_model in enumerate(seg_models):
                         
-                        setattr(args, 'model', seg_models[key])
+                        setattr(args, 'model', eval_model)
                         temp_params = Parameters(args)
                         
                         model_name = temp_params['Model_name']
                 
                         model = initialize_model(model_name, num_classes,
-                                                        temp_params)
+                                                 temp_params)
                         
                         # If parallelized, need to set change model
                         model = nn.DataParallel(model)
@@ -135,7 +135,7 @@ def Generate_Fat(indices,mask_type,seg_models,device,folds,num_classes,
                         torch.cuda.empty_cache()
     
                         #Compute estimated fat
-                        temp_fat[key+1] = preds[0].count_nonzero().item() * (temp_org_size/temp_ds_size) * (temp_org_rate)**2
+                        temp_fat[idx+1] = preds[0].count_nonzero().item() * (temp_org_size/temp_ds_size) * (temp_org_rate)**2
                      
                     #Save fat value for models
                     fat_table.append(temp_fat)

@@ -82,8 +82,8 @@ def Get_Metrics(metrics,seg_models,args,folds=5):
 
     model_names = []
     metric_names = []
-    for key in seg_models:
-        model_names.append(seg_models[key])
+    for model in seg_models:
+        model_names.append(model)
     for key in metrics:
         metric_names.append(metrics[key])
         
@@ -102,8 +102,8 @@ def Get_Metrics(metrics,seg_models,args,folds=5):
     
     # Initialize the histogram model for this run
     for split in range(0,folds):
-        for idx, key in enumerate(seg_models):
-            setattr(args, 'model', seg_models[key])
+        for idx, model in enumerate(seg_models):
+            setattr(args, 'model', model)
             temp_params = Parameters(args)
          
             #Get location of best weights
