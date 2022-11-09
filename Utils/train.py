@@ -72,11 +72,11 @@ def train_net(net,device,indices,split,Network_parameters,epochs=5,
               batch_size={'train': 1,'val': 1, 'test': 1},lr=0.001,save_cp=True,
               save_results=True,save_epoch=5,dir_checkpoint='checkpoints/',
               comet_exp=None):
+
+    dir_name,sum_name = Generate_Dir_Name(split, Network_parameters)
     
     if Network_parameters['Dataset'] in ["PRMI", "Peanut_PRMI"]:
         split = 0
-
-    dir_name,sum_name = Generate_Dir_Name(split, Network_parameters)
     
     since = time.time()
 

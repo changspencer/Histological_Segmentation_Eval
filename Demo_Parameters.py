@@ -56,7 +56,13 @@ def Parameters(args):
     
     #Select dataset. Set to number of desired segmentation dataset
     data_selection = args.data_selection
-    Dataset_names = { 1: 'SFBHI', 2: 'GlaS', 3: 'PRMI', 4: 'Peanut_PRMI'}
+    Dataset_names = {
+        1: 'SFBHI',
+        2: 'GlaS',
+        3: 'PRMI',
+        4: 'Peanut_PRMI',
+        5: 'SiTS'
+    }
     
     #If SFBHI, generate images with adipose tissue graphs
     if data_selection == 1:
@@ -152,19 +158,22 @@ def Parameters(args):
     img_dirs = {'SFBHI': true_dir + 'Datasets/SFBHI/Images/', 
                 'GlaS':  true_dir +'Datasets/GlaS/',
                 'PRMI':  true_dir +'Datasets/PRMI/PRMI_official',
-                'Peanut_PRMI':  true_dir +'Datasets/PRMI/PRMI_official'}
+                'Peanut_PRMI':  true_dir +'Datasets/PRMI/PRMI_official',
+                'SiTS':  true_dir +'Datasets/SiTS'}
     
     #Light directory
     mask_dirs = {'SFBHI':true_dir+ 'Datasets/SFBHI/Labels/', 
                  'GlaS': true_dir+'Datasets/GlaS/',
                  'PRMI': true_dir+'Datasets/PRMI/PRMI_official',
-                 'Peanut_PRMI': true_dir+'Datasets/PRMI/PRMI_official'}
+                 'Peanut_PRMI': true_dir+'Datasets/PRMI/PRMI_official',
+                 'SiTS': true_dir+'Datasets/SiTS'}
         
     #Number of classes in each dataset
     num_classes = {'SFBHI': 1, 
                   'GlaS': 1,
                   'PRMI': 1,
-                  'Peanut_PRMI': 1}  # only binary root segmentation
+                  'Peanut_PRMI': 1,
+                  'SiTS': 1}  # only binary root segmentation
     
     #Number of runs and/or splits for each dataset (5 fold)
     #For SFBHI, should be 5 unless "time" split (4)
@@ -172,12 +181,14 @@ def Parameters(args):
         Splits = {'SFBHI': 4, 
                   'GlaS': 5,
                   'PRMI': args.num_seeds,
-                  'Peanut_PRMI': args.num_seeds}
+                  'Peanut_PRMI': args.num_seeds,
+                  'SiTS': args.num_seeds}
     else:
         Splits = {'SFBHI': 5, 
                   'GlaS': 5,
                   'PRMI': args.num_seeds,
-                  'Peanut_PRMI': args.num_seeds}
+                  'Peanut_PRMI': args.num_seeds,
+                  'SiTS': args.num_seeds}
 
     Dataset = Dataset_names[data_selection]
     imgs_dir = img_dirs[Dataset]

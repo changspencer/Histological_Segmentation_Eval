@@ -122,7 +122,7 @@ def parse_args():
     parser.add_argument('--model', type=str, nargs="+", default=['UNET'],
                         help='Select models to train with (UNET, UNET+, Attention_UNET, JOSHUA, JOSHUA+, JOSHUAres) default: [UNET]')
     parser.add_argument('--data_selection', type=int, default=1,
-                        help='Dataset selection:  1: SFBHI, 2: GlaS, 3: PRMI, 4: Peanut_PRMI')
+                        help='Dataset selection:  1: SFBHI, 2: GlaS, 3: PRMI, 4: Peanut_PRMI, 5: SiTS')
     parser.add_argument('--channels', type=int, default=3,
                         help='Input channels of network (default: 3, RGB images)')
     parser.add_argument('--bilinear', type=bool, default=True,

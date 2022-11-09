@@ -92,7 +92,7 @@ def main(Params, args):
                 project_name=proj_name,
                 workspace="changspencer",
             )
-            experiment.set_name(f"TEST-{Dataset}-{model_name}-{split+1}")
+            experiment.set_name(f"{Dataset}-{model_name}-{split+1}")
         
         print('Starting Experiments...')
         if experiment is not None:

@@ -167,7 +167,7 @@ class RootsDataset(Dataset):
 
     @author: weihuang.xu
 
-    Sourced from the GatorSense/EZNET GitHub Repository for working with PRMI data.
+    Sourced from the GatorSense/EZUNET GitHub Repository for working with PRMI data.
     Some changes have been made to adapt it to Josh's Histological Segmentation code.
     """
     def __init__(self, root, mode='RGB', img_transform=None, label_transform=None,
@@ -275,4 +275,114 @@ class RootsDataset(Dataset):
 
         # Need to flip PRMI roots labeling (make 0 be soil)
         label = -label + label.max()
+        return {'image':img, 'mask': label, 'index': img_name, 'label': label_file}
+
+
+class SitsDataset(Dataset):
+    """
+    Created on Tue Nov 8 09:12:40 2022
+
+    @author: chang.spencer
+
+    Adapted from the RootsDataset class above.
+    """
+    def __init__(self, root, mode='RGB', img_transform=None, label_transform=None,
+                 subset:list=None):
+
+        self.class_list = [
+            'Peanut',
+            'SweetCorn',
+            'Coffee'
+        ]
+        if subset is not None:
+            self.class_list = subset
+
+        self.root = root
+        self.mode = mode
+        self.img_transform = img_transform
+        self.label_transform = label_transform
+        self.files = []
+
+        self.class_count = np.zeros(len(self.class_list), dtype=np.int)
+        imgdir = os.path.join(self.root, 'images')
+    
+        for os_root, dirs, files in os.walk(imgdir):
+            if os_root.find("_noMask") > -1:
+                continue
+
+            curr_class_idx = None
+            for class_idx in range(len(self.class_list)):
+                if self.class_list[class_idx] in os_root:
+                    curr_class_idx = class_idx
+                    break
+
+            # The subset of classes does not include 'os_root'
+            if curr_class_idx is None:
+                continue
+
+            for name in files:
+                imgpath = os.path.join(os_root, name)
+
+                rootp = pathlib.Path(os_root)
+                index = rootp.parts.index('images')
+                labelpath = os.path.join(self.root, 'masks_pixel_gt', *rootp.parts[index+1:])
+                labelpath = os.path.join(labelpath, f"{name.rsplit('.', 1)[0]}_mask.png")
+
+                # Label name validation
+                if labelpath.endswith('.png'):
+                    self.files.append({
+                        "img": imgpath,
+                        "label": labelpath
+                    })
+                else:
+                    ending = '.' + labelpath.split('.')[-1]
+                    self.files.append({
+                        "img": imgpath,
+                        "label": labelpath.replace(ending, '.png')
+                    })
+                self.class_count[curr_class_idx] += 1
+
+        # Increase the number of times an underrepresented class is sampled
+        file_idx = 0
+        self.sample_weights = np.zeros(self.class_count.sum())
+        for count in self.class_count:
+            class_weight = 0 if count == 0 else self.class_count.max() / count
+
+            self.sample_weights[file_idx:file_idx + count] = class_weight
+            file_idx += count
+
+    def __len__(self):     
+        return len(self.files)
+
+    def __getitem__(self, index):
+        datafiles = self.files[index]
+        
+        # Get specific filename (not filepath)
+        img_file = datafiles["img"]
+        img_name = pathlib.PurePath(img_file).name.rsplit('.', 1)[0]
+
+        if self.mode == 'RGB':
+            img = Image.open(img_file).convert('RGB')
+        if self.mode == 'gray':
+            img = Image.open(img_file).convert('L')
+            img = img.convert('RGB')
+
+        label_file = datafiles["label"]
+        label = Image.open(label_file).convert("1")
+
+        # print(img.size)
+        if img.size[0] < img.size[1]:
+            img = img.transpose(method=Image.ROTATE_90)
+            label = label.transpose(method=Image.ROTATE_90)
+            # print("ROTATED")
+
+        state = torch.get_rng_state()
+        if self.img_transform is not None:
+            img = self.img_transform(img)
+
+        torch.set_rng_state(state)
+        if self.label_transform is not None:
+            label = self.label_transform(label)
+        label = np.array(label)
+
         return {'image':img, 'mask': label, 'index': img_name, 'label': label_file}
