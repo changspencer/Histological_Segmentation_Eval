@@ -227,8 +227,8 @@ def parse_args():
                         help='Resize the image before center crop. (default: 256)')
     parser.add_argument('--center_size', type=int, default=None,
                         help='Center crop image. (default: 256)')
-    parser.add_argument('--optim', type=str, default='adam',
-                        help='learning optimizer - sgd, adamax, adam (default: Adam)')
+    parser.add_argument('--lr', type=float, default=0.001,
+                        help='learning rate (default: 0.001)')
     parser.add_argument('--optim', type=str, default='adam',
                         help='learning optimizer - sgd, adamax, adam (default: Adam)')
     parser.add_argument('--early_stop', type=int, default=10,
