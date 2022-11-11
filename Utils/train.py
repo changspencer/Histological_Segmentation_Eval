@@ -108,11 +108,19 @@ def train_net(net,device,indices,split,Network_parameters,epochs=5,
    
     # Set optimizer
     if Network_parameters['optim'] == 'sgd':
-        optimizer = optim.SGD(net.parameters(), lr=lr, weight_decay=1e-5, momentum=0.9)
+        # Original PRMI weight decay is UNK. Trying a ~standard 1e-5. Momentum 0.8
+        optimizer = optim.SGD(net.parameters(),
+                              lr=lr,
+                              weight_decay=Network_parameters['wgt_decay'],
+                              momentum=Network_parameters['momentum'])
     elif Network_parameters['optim'] == 'adamax':
-        optimizer = optim.Adamax(net.parameters(), lr=lr, weight_decay=5e-4)
+        # Recommended weight decay is 5e-4
+        optimizer = optim.Adamax(net.parameters(), lr=lr,
+                                 weight_decay=Network_parameters['wgt_decay'])
     else:
-        optimizer = optim.Adam(net.parameters(), lr=lr, weight_decay=1e-8)
+        # Original weight decay is 1e-8
+        optimizer = optim.Adam(net.parameters(), lr=lr,
+                               weight_decay=Network_parameters['wgt_decay'])
     
     #Set Early stopping
     early_stopping = EarlyStopping(patience=Network_parameters['early_stop'], verbose=True)

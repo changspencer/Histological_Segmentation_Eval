@@ -17,10 +17,10 @@ class DoubleConv(nn.Module):
             mid_channels = out_channels
         self.double_conv = nn.Sequential(
             nn.Conv2d(in_channels, mid_channels, kernel_size=3, padding=1),
-            nn.BatchNorm2d(mid_channels),
+            # nn.BatchNorm2d(mid_channels),
             nn.ReLU(inplace=True),
             nn.Conv2d(mid_channels, out_channels, kernel_size=3, padding=1),
-            nn.BatchNorm2d(out_channels),
+            # nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=True)
         )
 
@@ -142,7 +142,7 @@ class UpHist(nn.Module):
                 if add_bn:
                     self.hist_skip = nn.Sequential(nn.Conv2d(out_channels//2,
                                                     int(out_channels/(2*num_bins)),1),
-                                                    nn.BatchNorm2d(int(out_channels/(2*num_bins))),
+                                                    # nn.BatchNorm2d(int(out_channels/(2*num_bins))),
                                                     HistogramLayerUNET(int(out_channels/(2*num_bins)),
                                                     kernel_size=2,num_bins=num_bins,
                                                     normalize_count=normalize_count,
@@ -160,7 +160,7 @@ class UpHist(nn.Module):
                 if add_bn:
                     self.hist_skip = nn.Sequential(nn.Conv2d(out_channels,
                                                     int(out_channels/num_bins),1),
-                                                    nn.BatchNorm2d(int(out_channels/num_bins)),
+                                                    # nn.BatchNorm2d(int(out_channels/num_bins)),
                                                     HistogramLayerUNET(int(out_channels/num_bins),
                                                     kernel_size=2,num_bins=num_bins,
                                                     normalize_count=normalize_count,

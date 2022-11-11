@@ -229,6 +229,10 @@ def parse_args():
                         help='Center crop image. (default: 256)')
     parser.add_argument('--lr', type=float, default=0.001,
                         help='learning rate (default: 0.001)')
+    parser.add_argument('--momentum', type=float, default=0.8,
+                        help='SGD momentum (default: 0.8)')
+    parser.add_argument('--wgt_decay', type=float, default=1e-5,
+                        help='optimizer weight decay (default: 1e-5)')
     parser.add_argument('--optim', type=str, default='adam',
                         help='learning optimizer - sgd, adamax, adam (default: Adam)')
     parser.add_argument('--early_stop', type=int, default=10,

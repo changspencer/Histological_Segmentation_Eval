@@ -115,6 +115,8 @@ def Parameters(args):
     lr = args.lr
     early_stop = args.early_stop
     optim = args.optim
+    momentum = args.momentum
+    wgt_decay = args.wgt_decay
     
     #Parameters of Histogram Layer
     #For no padding, set 0. If padding is desired,
@@ -214,6 +216,8 @@ def Parameters(args):
                           'masks_dir': masks_dir,'num_workers': num_workers, 
                           'mode': mode,'lr_rate': lr,
                           'optim': optim,
+                          'momentum': momentum,
+                          'wgt_decay': wgt_decay,
                           'early_stop': early_stop,
                           'batch_size' : batch_size, 
                           'num_epochs': num_epochs, 'resize_size': resize_size, 
