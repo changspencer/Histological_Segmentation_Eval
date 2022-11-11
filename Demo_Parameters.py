@@ -113,6 +113,8 @@ def Parameters(args):
     #Set initial learning rate for model
     #Recommended values are .001 or .01
     lr = args.lr
+    early_stop = args.early_stop
+    optim = args.optim
     
     #Parameters of Histogram Layer
     #For no padding, set 0. If padding is desired,
@@ -211,6 +213,8 @@ def Parameters(args):
                           'Dataset': Dataset, 'imgs_dir': imgs_dir,
                           'masks_dir': masks_dir,'num_workers': num_workers, 
                           'mode': mode,'lr_rate': lr,
+                          'optim': optim,
+                          'early_stop': early_stop,
                           'batch_size' : batch_size, 
                           'num_epochs': num_epochs, 'resize_size': resize_size, 
                           'center_size': center_size, 'padding': padding, 

@@ -199,7 +199,7 @@ def parse_args():
                         help='Training data will be rotated, random flip (p=.5), random patch extraction (default:True')
     parser.add_argument('-numBins', type=int, default=16,
                         help='Number of bins for histogram layer. Recommended values are 4, 8 and 16. (default: 16)')
-    parser.add_argument('--feature_extraction', type=bool, default=True,
+    parser.add_argument('--feature_extraction', type=bool, default=False,
                         help='Flag for feature extraction. False, train whole model. True, only update fully connected and histogram layers parameters (default: True)')
     parser.add_argument('--use_pretrained', type=bool, default=False,
                         help='Flag to use pretrained model from ImageNet or train from scratch (default: False)')
@@ -227,8 +227,12 @@ def parse_args():
                         help='Resize the image before center crop. (default: 256)')
     parser.add_argument('--center_size', type=int, default=None,
                         help='Center crop image. (default: 256)')
-    parser.add_argument('--lr', type=float, default=0.001,
-                        help='learning rate (default: 0.01)')
+    parser.add_argument('--optim', type=str, default='adam',
+                        help='learning optimizer - sgd, adamax, adam (default: Adam)')
+    parser.add_argument('--optim', type=str, default='adam',
+                        help='learning optimizer - sgd, adamax, adam (default: Adam)')
+    parser.add_argument('--early_stop', type=int, default=10,
+                        help='number of epochs to wait for early stopping (default: 10)')
     parser.add_argument('--parallelize_model', type=bool, default=True,
                         help='enables CUDA training')
     parser.add_argument('--use-cuda', action='store_true', default=True,

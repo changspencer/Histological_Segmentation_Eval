@@ -106,12 +106,16 @@ def train_net(net,device,indices,split,Network_parameters,epochs=5,
     ''')
 
    
-    #Set optimizer
-    optimizer = optim.Adam(net.parameters(),lr=lr,weight_decay=1e-8)
-    # optimizer = optim.SGD(net.parameters(), lr=lr, weight_decay=1e-5, momentum=0.9)
+    # Set optimizer
+    if Network_parameters['optim'] == 'sgd':
+        optimizer = optim.SGD(net.parameters(), lr=lr, weight_decay=1e-5, momentum=0.9)
+    elif Network_parameters['optim'] == 'adamax':
+        optimizer = optim.Adamax(net.parameters(), lr=lr, weight_decay=5e-4)
+    else:
+        optimizer = optim.Adam(net.parameters(), lr=lr, weight_decay=1e-8)
     
     #Set Early stopping
-    early_stopping = EarlyStopping(patience=10, verbose=True)
+    early_stopping = EarlyStopping(patience=Network_parameters['early_stop'], verbose=True)
     
     if torch.cuda.device_count() > 1:
         n_classes = net.module.n_classes

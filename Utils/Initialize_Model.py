@@ -38,8 +38,8 @@ def initialize_model(model_name, num_classes, Network_parameters,
                              parallel=Network_parameters['parallel_skips'])
 
     # # PRMI UNET model for the roots segmentation
-    #!! Commented out to retain comparability with JOSHUA models
-    # elif (model_name == 'UNET') and Network_parameters['Dataset'] == 'PRMI': 
+    # #!! Commented out to retain comparability with JOSHUA models
+    # elif (model_name == 'UNET') and Network_parameters['Dataset'] in ['PRMI', 'Peanut_PRMI']: 
     #     model = PrmiUNet(num_classes, Network_parameters['channels'],
     #                      depth=5)
 

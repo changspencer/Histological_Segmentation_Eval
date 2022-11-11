@@ -15,7 +15,7 @@ def nanmean(x):
     """Computes the arithmetic mean ignoring any NaNs."""
     return torch.mean(x[x == x])
 
-def mean_average_precision(true,pred,num_classes):
+def mean_average_precision(true, pred, num_classes=None):
     """Computes various segmentation metrics on 2D feature maps.
     Args:
         true: a tensor of shape [B, C, H, W] or [B, H, W].
@@ -28,15 +28,15 @@ def mean_average_precision(true,pred,num_classes):
         avg_jacc: the jaccard index.
         avg_dice: the dice coefficient.
     """
-    
-    #Make true labels correct shape
-    # if len(pred_shape) < len(true_shape):
-    #     pred = to_one_hot
+    # Figure out the total number of classes left - UNTESTED
+    num_classes = torch.unique(true).shape[0]
+
     #Compute per-class average precision
-    Class_AP = average_precision(pred,true,num_classes=num_classes)
+    Class_AP = average_precision(pred, true, num_classes=num_classes)
     
-    #Convert to tensor
-    Class_AP = torch.stack(Class_AP)
+    # Convert to tensor (not sure if this has to do with # of batches or channels/classes)
+    if num_classes > 1:
+        Class_AP = torch.stack(Class_AP)
     
     #Return mean average precision
     mAP = nanmean(Class_AP)
