@@ -97,7 +97,11 @@ def train_net(net,device,indices,split,Network_parameters,epochs=5,
         Training Batch size:      {batch_size['train']}
         Validation Batch size:    {batch_size['val']}
         Test Batch size: {batch_size['test']}
+        Optimizer: {Network_parameters['optim']}
         Learning rate:   {lr}
+        Weight Decay: {Network_parameters['wgt_decay']}
+        Momentum (SGD only): {Network_parameters['momentum']}
+        Early Stopping: {Network_parameters['early_stop']}
         Training size:   {n_train}
         Validation size: {n_val}
         Testing size: {n_test}

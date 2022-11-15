@@ -50,7 +50,8 @@ def Get_Dataloaders(split,indices,Network_parameters,batch_size):
                                                           split=split,
                                                           augment=Network_parameters['augment'],
                                                           rotate=Network_parameters['rotate'],
-                                                          patch_size=640)
+                                                          patch_size=640,
+                                                          train_class_lim=Network_parameters['train_class_lim'])
        
         #Get postive weight (for histological fat images only)
         pos_wt = 1
@@ -63,7 +64,8 @@ def Get_Dataloaders(split,indices,Network_parameters,batch_size):
                                                           augment=Network_parameters['augment'],
                                                           rotate=Network_parameters['rotate'],
                                                           patch_size=640,
-                                                          data_subset=['Peanut'])
+                                                          data_subset=['Peanut'],
+                                                          train_class_lim=Network_parameters['train_class_lim'])
        
         #Get postive weight (for histological fat images only)
         pos_wt = 1
@@ -170,7 +172,7 @@ def load_SFBHI(data_path,indices, batch_size, num_workers, pin_memory=True,
 
 def load_PRMI(data_path, batch_size, num_workers, pin_memory=True,
               split=0, patch_size=640, sampler_mul=8, augment=False, rotate=False,
-              data_subset=None):
+              data_subset=None, train_class_lim:int=None):
 
     # Resize to some 4:3 ratio because PRMI data is in 4:3 ratio.
     # resize_transform = [transforms.Resize((patch_size, patch_size * 3 // 4))]
@@ -195,7 +197,8 @@ def load_PRMI(data_path, batch_size, num_workers, pin_memory=True,
         root=data_path + "/train",
         img_transform=transforms.Compose(train_transform),
         label_transform=gt_transforms,
-        subset=data_subset
+        subset=data_subset,
+        class_count_lim=train_class_lim
     )
     train_sampler = WeightedRandomSampler(train_dataset.sample_weights,
                                           len(train_dataset.files),

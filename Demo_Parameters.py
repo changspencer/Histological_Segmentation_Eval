@@ -138,6 +138,7 @@ def Parameters(args):
     batch_size = {'train': args.train_batch_size, 'val': args.val_batch_size, 
                   'test': args.test_batch_size}
     num_epochs = args.num_epochs
+    train_class_lim = args.train_class_lim
     
     #Pin memory for dataloader (set to True for experiments)
     pin_memory = True
@@ -219,7 +220,8 @@ def Parameters(args):
                           'momentum': momentum,
                           'wgt_decay': wgt_decay,
                           'early_stop': early_stop,
-                          'batch_size' : batch_size, 
+                          'batch_size' : batch_size,
+                          'train_class_lim': train_class_lim,
                           'num_epochs': num_epochs, 'resize_size': resize_size, 
                           'center_size': center_size, 'padding': padding, 
                           'normalize_count': normalize_count, 

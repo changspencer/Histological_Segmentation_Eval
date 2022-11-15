@@ -171,7 +171,7 @@ class RootsDataset(Dataset):
     Some changes have been made to adapt it to Josh's Histological Segmentation code.
     """
     def __init__(self, root, mode='RGB', img_transform=None, label_transform=None,
-                 subset:list=None):
+                 subset:list=None, class_count_lim:int=None):
 
         self.class_list = [
             'Cotton',
@@ -230,6 +230,10 @@ class RootsDataset(Dataset):
                         "label": labelpath.replace(ending, '.png')
                     })
                 self.class_count[curr_class_idx] += 1
+
+                # Cut-off the number of exemplars to use per class
+                if class_count_lim is not None and self.class_count[curr_class_idx] >= class_count_lim:
+                    break
 
         # Increase the number of times an underrepresented class is sampled
         file_idx = 0
