@@ -37,15 +37,16 @@ def initialize_model(model_name, num_classes, Network_parameters,
                              analyze=analyze,
                              parallel=Network_parameters['parallel_skips'])
 
-    # # PRMI UNET model for the roots segmentation
-    # #!! Commented out to retain comparability with JOSHUA models
-    # elif (model_name == 'UNET') and Network_parameters['Dataset'] in ['PRMI', 'Peanut_PRMI']: 
-    #     model = PrmiUNet(num_classes, Network_parameters['channels'],
-    #                      depth=5)
+    # PRMI UNET model for the roots segmentation
+    #!! Commented out to retain comparability with JOSHUA models
+    elif (model_name == 'XuNET') and Network_parameters['Dataset'] in ['PRMI', 'Peanut_PRMI']: 
+        model = PrmiUNet(num_classes, Network_parameters['channels'],
+                         depth=5)
 
-    #     if Network_parameters['use_pretrained']:
-    #         state_dict = torch.load("P-EnDe-model.pth", map_location='cpu')
-    #         model.load_state_dict(state_dict)
+        if Network_parameters['use_pretrained']:
+            state_dict = torch.load("P-EnDe-model.pth", map_location='cpu')
+            model.load_state_dict(state_dict)
+            print("Loaded pretrained P-EnDe-model.pth model successfully...")
 
     #Base UNET model or UNET+ (our version of attention)
     elif (model_name == 'UNET') or (model_name == 'UNET+'): 

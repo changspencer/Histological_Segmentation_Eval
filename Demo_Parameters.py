@@ -23,11 +23,11 @@ def Parameters(args):
     # 'JOSHUA+'
     model = args.model
     
-    seg_models = {'UNET': 0,'UNET+': 1, 'Attention_UNET': 2,
-                  'JOSHUA': 3, 'JOSHUA+': 4, 'JOSHUAres': 5}
+    seg_models = {'UNET': 0, 'UNET+': 1, 'Attention_UNET': 2,
+                  'JOSHUA': 3, 'JOSHUA+': 4, 'JOSHUAres': 5, 'XuNET': 6}
     #model_selection = {0: 1, 1: 1, 2: 4, 3: 1, 4: 1}
-    hist_skips = {0: False, 1: False, 2: False, 3: True, 4: True, 5: True}
-    attention = {0: False, 1: True, 2: True, 3: False, 4: True, 5: False}
+    hist_skips = {0: False, 1: False, 2: False, 3: True, 4: True, 5: True, 6: False}
+    attention = {0: False, 1: True, 2: True, 3: False, 4: True, 5: False, 6: False}
     
     #Flag for to save out model at certain checkpoints (default: every 5 epochs)
     #Set to True to save results out and False to not save results

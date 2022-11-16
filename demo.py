@@ -186,7 +186,7 @@ def parse_args():
     parser.add_argument('--folder', type=str, default='Saved_Models/',
                         help='Location to save models')
     parser.add_argument('--model', type=str, nargs="+", default=['UNET'],
-                        help='Select models to train with (UNET, UNET+, Attention_UNET, JOSHUA, JOSHUA+, JOSHUAres) default: [UNET]')
+                        help='Select models to train with (UNET, UNET+, Attention_UNET, JOSHUA, JOSHUA+, JOSHUAres, XuNET) default: [UNET]')
     parser.add_argument('--data_selection', type=int, default=1,
                         help='Dataset selection:  1: SFBHI, 2: GlaS, 3: PRMI, 4: Peanut_PRMI')
     parser.add_argument('--channels', type=int, default=3,
@@ -202,7 +202,7 @@ def parse_args():
     parser.add_argument('--feature_extraction', type=bool, default=False,
                         help='Flag for feature extraction. False, train whole model. True, only update fully connected and histogram layers parameters (default: True)')
     parser.add_argument('--use_pretrained', type=bool, default=False,
-                        help='Flag to use pretrained model from ImageNet or train from scratch (default: False)')
+                        help='Flag to use pretrained model from ImageNet or train from scratch, only works for XuNET (default: False)')
     parser.add_argument('--data_split', type=str, default='Normal',
                         help='whether to split SFBHI at time split (default: Normal)')
     parser.add_argument('--train_class_lim', type=int, default=None,
