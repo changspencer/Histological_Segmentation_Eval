@@ -1,8 +1,9 @@
 ## PyTorch dependencies
 from torchvision import models
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch
+from torch.nn import init
 
 ## Local external libraries
 from .JOSHUA_parts import *
@@ -102,7 +103,12 @@ class JOSHUA(nn.Module):
             self.up4 = Up(128, 64 * factor, bilinear)
         
         self.outc = OutConv(64, n_classes)
-
+        
+        # Change the initialization for the convolutional models
+        for mod in self.modules():
+            if isinstance(mod, nn.Conv2d):
+                init.xavier_normal_(mod.weight)
+                init.constant_(mod.bias, 0)
 
     def forward(self, x):
        
