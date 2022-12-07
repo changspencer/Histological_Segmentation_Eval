@@ -156,12 +156,3 @@ class JOSHUA(nn.Module):
             logits = self.outc(x)
             return logits
       
-
-        
-        
-        
-        
-        
-        
-        
-        

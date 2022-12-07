@@ -50,7 +50,7 @@ def Get_Dataloaders(split,indices,Network_parameters,batch_size):
                                                           split=split,
                                                           augment=Network_parameters['augment'],
                                                           rotate=Network_parameters['rotate'],
-                                                          patch_size=640,
+                                                          patch_size=Network_parameters['patch_size'],
                                                           train_class_lim=Network_parameters['train_class_lim'])
        
         #Get postive weight (for histological fat images only)
@@ -63,7 +63,7 @@ def Get_Dataloaders(split,indices,Network_parameters,batch_size):
                                                           split=split,
                                                           augment=Network_parameters['augment'],
                                                           rotate=Network_parameters['rotate'],
-                                                          patch_size=640,
+                                                          patch_size=Network_parameters['patch_size'],
                                                           data_subset=['Peanut'],
                                                           train_class_lim=Network_parameters['train_class_lim'])
        
@@ -175,22 +175,30 @@ def load_PRMI(data_path, batch_size, num_workers, pin_memory=True,
               data_subset=None, train_class_lim:int=None):
 
     # Resize to some 4:3 ratio because PRMI data is in 4:3 ratio.
-    # resize_transform = [transforms.Resize((patch_size, patch_size * 3 // 4))]
-    crop_transform = [transforms.RandomResizedCrop((patch_size, patch_size * 3 // 4))]
+    # center_crop = [transforms.CenterCrop((patch_size * 3 // 4, patch_size))]
+    resize_transform = [transforms.Resize((patch_size * 3 // 4, patch_size))]
+    crop_transform = [transforms.RandomResizedCrop((patch_size * 3 // 4, patch_size),
+                                                   scale=(0.1, 1.0),
+                                                   ratio=(0.75, 0.75))]
+    test_crop = [transforms.RandomCrop((480, 640))]
+
     # Train data transforms: Resizing and maybe some data augmentation
     if augment:
         train_transform = crop_transform + [
             # transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.05),
             transforms.ToTensor(),
         ]
+        # Mask transforms: resizing only
+        gt_transforms = transforms.Compose(crop_transform +
+                                           [transforms.ToTensor()])
     else:
-        train_transform = crop_transform + [transforms.ToTensor()]
+        random_crop = [transforms.RandomCrop((patch_size * 3 // 4, patch_size))]
+        train_transform = random_crop + [transforms.ToTensor()]
+        gt_transforms = transforms.Compose(random_crop +
+                                           [transforms.ToTensor()])
     # Test data transforms: resizing only
-    test_transform = transforms.Compose(crop_transform +
+    test_transform = transforms.Compose(test_crop +
                                         [transforms.ToTensor()])
-    # Mask transforms: resizing only
-    gt_transforms = transforms.Compose(crop_transform +
-                                       [transforms.ToTensor()])
 
     # Have a uniform sampling of classes for each batch
     train_dataset = RootsDataset(
@@ -216,7 +224,7 @@ def load_PRMI(data_path, batch_size, num_workers, pin_memory=True,
     valid_loader = DataLoader(
         RootsDataset(root=data_path + "/val",
                      img_transform=test_transform,
-                     label_transform=gt_transforms,
+                     label_transform=test_transform,
                      subset=data_subset),
         batch_size=batch_size['val'],
         num_workers=num_workers,
@@ -227,7 +235,7 @@ def load_PRMI(data_path, batch_size, num_workers, pin_memory=True,
     test_loader = DataLoader(
         RootsDataset(root=data_path + "/test",
                      img_transform=test_transform,
-                     label_transform=gt_transforms,
+                     label_transform=test_transform,
                      subset=data_subset),
         batch_size=batch_size['test'],
         num_workers=num_workers,

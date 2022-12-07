@@ -84,10 +84,8 @@ def Parameters(args):
     augment = args.augment
     rotate = args.rotate
     
-    #Resize the image before center crop. Recommended values for resize is 256 (used in paper)
-    #Center crop size is recommended to be 256 (No center crops). 
-    resize_size = args.resize_size
-    center_size = args.center_size
+    #Image patch size to get random crops
+    patch_size = args.patch_size
     
     #Number of folds for K fold CV
     fold_datasets = {1: 5, 2: 5, 3: 1, 4: 1}
@@ -222,8 +220,9 @@ def Parameters(args):
                           'early_stop': early_stop,
                           'batch_size' : batch_size,
                           'train_class_lim': train_class_lim,
-                          'num_epochs': num_epochs, 'resize_size': resize_size, 
-                          'center_size': center_size, 'padding': padding, 
+                          'num_epochs': num_epochs,
+                          'patch_size': patch_size, 
+                          'padding': padding, 
                           'normalize_count': normalize_count, 
                           'normalize_bins': normalize_bins,
                           'numBins': numBins,'Model_name': Model_name,

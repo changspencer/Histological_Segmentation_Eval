@@ -8,6 +8,13 @@ Used to train all models (modify line 204 to select certain models)
 ## Python standard libraries
 from __future__ import print_function
 from __future__ import division
+
+# Comet ML logging package
+try:
+    from comet_ml import Experiment
+except:
+    Experiment = None
+
 import numpy as np
 import os
 import argparse
@@ -30,12 +37,6 @@ from Utils.Save_Results import save_params
 from Utils.train import train_net
 
 import pdb
-
-# Comet ML logging package
-try:
-    from comet_ml import Experiment
-except:
-    Experiment = None
 
 #Turn off plotting
 plt.ioff()
@@ -179,7 +180,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Run segmentation models for dataset')
     parser.add_argument('--save_results', type=bool, default=True,
                         help='Save results of experiments(default: True')
-    parser.add_argument('--save_cp', type=bool, default=True,
+    parser.add_argument('--save_cp', type=bool, default=False,
                         help='Save results of experiments at each checkpoint (default: False)')
     parser.add_argument('--save_epoch', type=int, default=5,
                         help='Epoch for checkpoint (default: 5')
@@ -191,13 +192,13 @@ def parse_args():
                         help='Dataset selection:  1: SFBHI, 2: GlaS, 3: PRMI, 4: Peanut_PRMI')
     parser.add_argument('--channels', type=int, default=3,
                         help='Input channels of network (default: 3, RGB images)')
-    parser.add_argument('--bilinear', type=bool, default=True,
-                        help='Upsampling feature maps, set to True to use bilinear interpolation. Set to False to learn transpose convolution (consume more memory)')
+    parser.add_argument('--bilinear', type=bool, default=False,
+                        help='Upsampling feature maps, set to True - bilinear interpolation. False - learn transpose convolution (consume more memory) (default: False)')
     parser.add_argument('--augment', type=bool, default=False,
                         help='Data augmentation (default: True)')
     parser.add_argument('--rotate', type=bool, default=True,
                         help='Training data will be rotated, random flip (p=.5), random patch extraction (default:True')
-    parser.add_argument('-numBins', type=int, default=16,
+    parser.add_argument('--numBins', type=int, default=16,
                         help='Number of bins for histogram layer. Recommended values are 4, 8 and 16. (default: 16)')
     parser.add_argument('--feature_extraction', type=bool, default=False,
                         help='Flag for feature extraction. False, train whole model. True, only update fully connected and histogram layers parameters (default: True)')
@@ -225,10 +226,8 @@ def parse_args():
                         help='Set whether to use sum (unnormalized count) or average pooling (normalized count) (default: True)')
     parser.add_argument('--normalize_bins',type=bool, default=True,
                         help='Set whether to enforce sum to one constraint across bins (default: True)')
-    parser.add_argument('--resize_size', type=int, default=None,
-                        help='Resize the image before center crop. (default: 256)')
-    parser.add_argument('--center_size', type=int, default=None,
-                        help='Center crop image. (default: 256)')
+    parser.add_argument('--patch_size', type=int, default=640,
+                        help='Patch size of random image crops; aspect is 3:4. (default: 640)')
     parser.add_argument('--lr', type=float, default=0.001,
                         help='learning rate (default: 0.001)')
     parser.add_argument('--momentum', type=float, default=0.8,
