@@ -49,7 +49,7 @@ def save_results(train_dict,test_dict,split,Network_parameters,num_params):
     np.save((filename + 'Index'), test_dict['Index'])
 
 
-def save_params(Network_parameters, split):
+def save_params(Network_parameters, split, loader_transforms:dict):
     '''
     Print the network parameters to stdout and write to a file
     in the Saved_Results subfolders.
@@ -86,4 +86,11 @@ def save_params(Network_parameters, split):
                         out_file.write(f"      {sub_key}: {key_dict[sub_key]}\n")
             else:
                 out_file.write(f"   {key}: {Network_parameters[key]}\n")
+        
+        out_file.write("\nDataloader Transforms\n")
+        out_file.write(f"--- Training:\n{loader_transforms['train']}\n\n")
+        out_file.write(f"--- Validation:\n{loader_transforms['val']}\n\n")
+        out_file.write(f"--- Test:\n{loader_transforms['test']}\n\n")
+        out_file.write(f"--- ")
+
     print("Saved parameters to DIR: " + filename)

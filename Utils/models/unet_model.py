@@ -39,11 +39,11 @@ class UNet(nn.Module):
         self.up4 = Up(128, 64 * factor, bilinear, use_attention=self.use_attention)
         self.outc = OutConv(64, n_classes)
         
-        # Change the initialization for the convolutional models
-        for mod in self.modules():
-            if isinstance(mod, nn.Conv2d):
-                init.xavier_normal_(mod.weight)
-                init.constant_(mod.bias, 0)
+        # # Change the initialization for the convolutional models
+        # for mod in self.modules():
+        #     if isinstance(mod, nn.Conv2d):
+        #         init.xavier_normal_(mod.weight)
+        #         init.constant_(mod.bias, 0)
 
     def forward(self, x):
         x1 = self.inc(x)

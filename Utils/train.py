@@ -22,6 +22,8 @@ from .eval import *
 from barbar import Bar
 from .pytorchtools import EarlyStopping
 
+from .Save_Results import save_params
+
 
 #Add save option here
 def Generate_Dir_Name(split,Network_parameters):
@@ -74,7 +76,8 @@ def train_net(net,device,indices,split,Network_parameters,epochs=5,
               comet_exp=None):
 
     dir_name,sum_name = Generate_Dir_Name(split, Network_parameters)
-    
+    run_no = split
+
     if Network_parameters['Dataset'] in ["PRMI", "Peanut_PRMI"]:
         split = 0
     
@@ -87,6 +90,13 @@ def train_net(net,device,indices,split,Network_parameters,epochs=5,
     n_test = len(indices['test'][split])
 
     dataloaders, pos_wt = Get_Dataloaders(split,indices,Network_parameters,batch_size)
+    save_params(Network_parameters, run_no,
+        {
+         'train': dataloaders['train'].dataset.img_transform,
+         'val': dataloaders['val'].dataset.img_transform,
+         'test': dataloaders['test'].dataset.img_transform
+        }
+    )
 
     writer = SummaryWriter(log_dir=sum_name+ 'Run_' +str(split+1))
     

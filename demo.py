@@ -98,10 +98,10 @@ def main(Params, args):
         print('Starting Experiments...')
         if experiment is not None:
             experiment.log_parameters(Params)
-            save_params(Params, split)
+            # save_params(Params, split)
         else:
-            save_params(Params, split)
-            print()
+            # save_params(Params, split)
+            print("NOTE: No Comet Experiment import found...")
 
         # Initialize the segmentation model for this run
         model = initialize_model(model_name, num_classes, Params)
