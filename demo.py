@@ -187,7 +187,7 @@ def parse_args():
     parser.add_argument('--folder', type=str, default='Saved_Models/',
                         help='Location to save models')
     parser.add_argument('--model', type=str, nargs="+", default=['UNET'],
-                        help='Select models to train with (UNET, UNET+, Attention_UNET, JOSHUA, JOSHUA+, JOSHUAres, XuNET) default: [UNET]')
+                        help='Select models to train with (UNET, UNET+, Attention_UNET, JOSHUA, JOSHUA+, JOSHUAres, XuNET, FCN) default: [UNET]')
     parser.add_argument('--data_selection', type=int, default=1,
                         help='Dataset selection:  1: SFBHI, 2: GlaS, 3: PRMI, 4: Peanut_PRMI')
     parser.add_argument('--channels', type=int, default=3,

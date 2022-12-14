@@ -15,6 +15,7 @@ from .models.Histogram_Model import JOSHUA
 from .models.unet_model import UNet
 from .models.attention_unet_model import AttUNet
 from .models.prmi_unet import PrmiUNet
+from .models.fully_conv import myFCN
 
        
 def initialize_model(model_name, num_classes, Network_parameters,
@@ -63,6 +64,9 @@ def initialize_model(model_name, num_classes, Network_parameters,
                           feature_extraction = Network_parameters['feature_extraction'],
                           use_attention=Network_parameters['use_attention'])
 
+    #mini-FCn model introduced in 2016
+    elif model_name == 'FCN':
+            model = myFCN(Network_parameters['channels'], num_classes)
    
     else: #Show error that segmentation model is not available
         raise RuntimeError('Invalid model')
