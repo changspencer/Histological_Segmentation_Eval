@@ -88,9 +88,8 @@ def save_params(Network_parameters, split, loader_transforms:dict):
                 out_file.write(f"   {key}: {Network_parameters[key]}\n")
         
         out_file.write("\nDataloader Transforms\n")
-        out_file.write(f"--- Training:\n{loader_transforms['train']}\n\n")
-        out_file.write(f"--- Validation:\n{loader_transforms['val']}\n\n")
-        out_file.write(f"--- Test:\n{loader_transforms['test']}\n\n")
-        out_file.write(f"--- ")
+        out_file.write(f"--- Training:\n{loader_transforms['train']}\n")
+        out_file.write(f"--- Validation:\n{loader_transforms['val']}\n")
+        out_file.write(f"--- Test:\n{loader_transforms['test']}\n")
 
     print("Saved parameters to DIR: " + filename)

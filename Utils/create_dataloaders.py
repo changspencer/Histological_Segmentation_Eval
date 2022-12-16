@@ -182,23 +182,34 @@ def load_PRMI(data_path, batch_size, num_workers, pin_memory=True,
                                                    ratio=(0.75, 0.75))]
     test_crop = [transforms.RandomCrop((480, 640))]
 
+    # Normalizing values taken from manual image analysis of images
+    if data_subset == ["Peanut"]:
+        prmi_mean = (0.5073, 0.4775, 0.4381)
+        prmi_dev = (0.1463, 0.1448, 0.1424)
+    else:  # data_subset is None
+        prmi_mean = (0.5075, 0.4687, 0.4296)
+        prmi_dev = (0.1302, 0.1275, 0.1245)
+
     # Train data transforms: Resizing and maybe some data augmentation
     if augment:
         train_transform = crop_transform + [
             # transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.05),
             transforms.ToTensor(),
+            transforms.Normalize(prmi_mean, prmi_dev)
         ]
         # Mask transforms: resizing only
         gt_transforms = transforms.Compose(crop_transform +
                                            [transforms.ToTensor()])
     else:
         random_crop = [transforms.RandomCrop((patch_size * 3 // 4, patch_size))]
-        train_transform = random_crop + [transforms.ToTensor()]
+        train_transform = random_crop + [transforms.ToTensor(),
+                                         transforms.Normalize(prmi_mean, prmi_dev)]
         gt_transforms = transforms.Compose(random_crop +
                                            [transforms.ToTensor()])
     # Test data transforms: resizing only
     test_transform = transforms.Compose(test_crop +
-                                        [transforms.ToTensor()])
+                                        [transforms.ToTensor(),
+                                         transforms.Normalize(prmi_mean, prmi_dev)])
 
     # Have a uniform sampling of classes for each batch
     train_dataset = RootsDataset(
