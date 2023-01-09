@@ -3,11 +3,13 @@
 Created on Wed Feb 10 14:35:49 2021
 Generate Dataloaders
 @author: jpeeples
+@editor: changspencer
 """
 from torch.utils.data import DataLoader
 from torch.utils.data import WeightedRandomSampler
 import torch
 from torchvision import transforms
+import torchvision.transforms.functional as TF
 from .utils import ExpandedRandomSampler
 from .dataset import PhotoDataset, RootsDataset, SitsDataset
 import numpy as np
@@ -17,6 +19,20 @@ def seed_worker(worker_id):
     worker_seed = torch.initial_seed() % 2**32 
     np.random.seed(worker_seed)
     random.seed(worker_seed)
+
+class QuantizedRotation:
+    """Rotate by one of the given angles.
+    Originally presented as example custom transforms at
+        https://pytorch.org/vision/stable/transforms.html.
+    """
+    def __init__(self, angles):
+        self.angles = angles
+
+    def __call__(self, x):
+
+        angle = random.choice(self.angles)
+        return TF.rotate(x, angle, fill=0)
+
 
 def Get_Dataloaders(split,indices,Network_parameters,batch_size):
     
@@ -176,10 +192,13 @@ def load_PRMI(data_path, batch_size, num_workers, pin_memory=True,
 
     # Resize to some 4:3 ratio because PRMI data is in 4:3 ratio.
     # center_crop = [transforms.CenterCrop((patch_size * 3 // 4, patch_size))]
-    resize_transform = [transforms.Resize((patch_size * 3 // 4, patch_size))]
-    crop_transform = [transforms.RandomResizedCrop((patch_size * 3 // 4, patch_size),
+    resize_transform = [transforms.Resize((patch_size, patch_size))]
+    crop_transform = [transforms.RandomResizedCrop((patch_size, patch_size),
                                                    scale=(0.1, 1.0),
                                                    ratio=(0.75, 0.75))]
+    misc_transform = [
+        QuantizedRotation(angles=[0, 90, 180, 270])
+    ]
     test_crop = [transforms.RandomCrop((480, 640))]
 
     # Normalizing values taken from manual image analysis of images
@@ -192,13 +211,12 @@ def load_PRMI(data_path, batch_size, num_workers, pin_memory=True,
 
     # Train data transforms: Resizing and maybe some data augmentation
     if augment:
-        train_transform = crop_transform + [
-            # transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.05),
+        train_transform = crop_transform + misc_transform + [
             transforms.ToTensor(),
             transforms.Normalize(prmi_mean, prmi_dev)
         ]
         # Mask transforms: resizing only
-        gt_transforms = transforms.Compose(crop_transform +
+        gt_transforms = transforms.Compose(crop_transform + misc_transform +
                                            [transforms.ToTensor()])
     else:
         random_crop = [transforms.RandomCrop((patch_size * 3 // 4, patch_size))]
@@ -210,6 +228,8 @@ def load_PRMI(data_path, batch_size, num_workers, pin_memory=True,
     test_transform = transforms.Compose(test_crop +
                                         [transforms.ToTensor(),
                                          transforms.Normalize(prmi_mean, prmi_dev)])
+    test_gt_transform = transforms.Compose(test_crop +
+                                        [transforms.ToTensor()])
 
     # Have a uniform sampling of classes for each batch
     train_dataset = RootsDataset(
@@ -235,7 +255,7 @@ def load_PRMI(data_path, batch_size, num_workers, pin_memory=True,
     valid_loader = DataLoader(
         RootsDataset(root=data_path + "/val",
                      img_transform=test_transform,
-                     label_transform=test_transform,
+                     label_transform=test_gt_transform,
                      subset=data_subset),
         batch_size=batch_size['val'],
         num_workers=num_workers,
@@ -246,7 +266,7 @@ def load_PRMI(data_path, batch_size, num_workers, pin_memory=True,
     test_loader = DataLoader(
         RootsDataset(root=data_path + "/test",
                      img_transform=test_transform,
-                     label_transform=test_transform,
+                     label_transform=test_gt_transform,
                      subset=data_subset),
         batch_size=batch_size['test'],
         num_workers=num_workers,
@@ -265,6 +285,10 @@ def load_sits(data_path, batch_size, num_workers, pin_memory=True,
               data_subset=None):
 
     crop_transform = []  # Remove resizing for now.
+
+    # Normalizing values taken from manual image analysis of images
+    sits_mean = (0.2870, 0.2238, 0.1639)
+    sits_dev = (0.0975, 0.0914, 0.0713)
     
     # Train data transforms: Resizing and maybe some data augmentation
     if augment:

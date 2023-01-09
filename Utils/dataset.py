@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 
 from .utils import check_files
 from torchvision.transforms import functional as F
-from random import random, randint
+from random import random, randint, setstate, getstate
 from os.path import splitext
 from os import listdir
 import os
@@ -268,11 +268,13 @@ class RootsDataset(Dataset):
             img = img.transpose(method=Image.ROTATE_90)
             label = label.transpose(method=Image.ROTATE_90)
 
-        state = torch.get_rng_state()
+        torch_state = torch.get_rng_state()
+        python_state = getstate()  # For QuantizedRotation
         if self.img_transform is not None:
             img = self.img_transform(img)
 
-        torch.set_rng_state(state)
+        torch.set_rng_state(torch_state)
+        setstate(python_state)  # For QuantizedRotation
         if self.label_transform is not None:
             label = self.label_transform(label)
         label = np.array(label)
