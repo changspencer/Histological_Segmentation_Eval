@@ -205,6 +205,9 @@ def load_PRMI(data_path, batch_size, num_workers, pin_memory=True,
     if data_subset == ["Peanut"]:
         prmi_mean = (0.5073, 0.4775, 0.4381)
         prmi_dev = (0.1463, 0.1448, 0.1424)
+    elif data_subset == ["Peanut", "Switchgrass"]:
+        prmi_mean = (0.4910, 0.4621, 0.4246)
+        prmi_dev = (0.1338, 0.1321, 0.1297)
     else:  # data_subset is None
         prmi_mean = (0.5075, 0.4687, 0.4296)
         prmi_dev = (0.1302, 0.1275, 0.1245)
