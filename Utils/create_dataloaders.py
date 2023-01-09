@@ -195,11 +195,12 @@ def load_PRMI(data_path, batch_size, num_workers, pin_memory=True,
     resize_transform = [transforms.Resize((patch_size, patch_size))]
     crop_transform = [transforms.RandomResizedCrop((patch_size, patch_size),
                                                    scale=(0.1, 1.0),
-                                                   ratio=(0.75, 0.75))]
+                                                   ratio=(1, 1))]
+                                                #    ratio=(0.75, 0.75))]
     misc_transform = [
         QuantizedRotation(angles=[0, 90, 180, 270])
     ]
-    test_crop = [transforms.RandomCrop((480, 640))]
+    test_crop = [transforms.RandomCrop((480, 480))]
 
     # Normalizing values taken from manual image analysis of images
     if data_subset == ["Peanut"]:
