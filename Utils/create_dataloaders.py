@@ -96,6 +96,17 @@ def Get_Dataloaders(split,indices,Network_parameters,batch_size):
        
         #Get postive weight (for histological fat images only)
         pos_wt = 1
+        
+    elif Network_parameters['Dataset'] == 'SiTS_crop':
+        train_loader, val_loader, test_loader = load_sits(Network_parameters['imgs_dir'],
+                                                          batch_size,
+                                                          Network_parameters['num_workers'],
+                                                          split=split,
+                                                          augment=Network_parameters['augment'],
+                                                          rotate=Network_parameters['rotate'])
+       
+        #Get postive weight (for histological fat images only)
+        pos_wt = 1
        
     dataloaders = {'train': train_loader, 'val': val_loader, 'test': test_loader}
     
@@ -287,42 +298,50 @@ def load_PRMI(data_path, batch_size, num_workers, pin_memory=True,
 def load_sits(data_path, batch_size, num_workers, pin_memory=True,
               split=0, patch_size:int=None, sampler_mul=8, augment=False, rotate=False,
               data_subset=None):
+    resize_transform = [transforms.Resize((patch_size, patch_size))]
+    center_crop = [transforms.CenterCrop((60, 96))]
 
-    crop_transform = []  # Remove resizing for now.
-
-    # Normalizing values taken from manual image analysis of images
+    # Normalizations found manually for the uncropped image size
     sits_mean = (0.2870, 0.2238, 0.1639)
     sits_dev = (0.0975, 0.0914, 0.0713)
-    
+
     # Train data transforms: Resizing and maybe some data augmentation
     if augment:
-        train_transform = crop_transform + [
+        crop_transform = [
+            transforms.RandomCrop((patch_size, patch_size))
+        ]
+        train_transform = transforms.Compose(
+            crop_transform + [
             # transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.05),
             transforms.ToTensor(),
-        ]
+            transforms.Normalize(sits_mean, sits_dev)
+        ])
+        # Mask transforms: 
+        gt_transforms = transforms.Compose(crop_transform +
+                                           [transforms.ToTensor()])
     else:
-        train_transform = crop_transform + [transforms.ToTensor()]
-    # Test data transforms: resizing only
-    test_transform = transforms.Compose(crop_transform +
+        train_transform = transforms.Compose(center_crop +
+                                             [transforms.ToTensor(),
+                                              transforms.Normalize(sits_mean, sits_dev)])
+        gt_transforms = transforms.Compose(center_crop + 
+                                           [transforms.ToTensor()])
+    # Test data transforms: resizing only - Commented out for now; all images same size
+    test_transform = transforms.Compose(# center_crop +
+                                        [transforms.ToTensor(),
+                                         transforms.Normalize(sits_mean, sits_dev)])
+    test_gt_transform = transforms.Compose(# center_crop +
                                         [transforms.ToTensor()])
-    # Mask transforms: resizing only
-    gt_transforms = transforms.Compose(crop_transform +
-                                       [transforms.ToTensor()])
 
     # Have a uniform sampling of classes for each batch
     train_dataset = SitsDataset(
         root=data_path + "/train",
-        img_transform=transforms.Compose(train_transform),
+        img_transform=train_transform,
         label_transform=gt_transforms,
         subset=data_subset
     )
-    # train_sampler = WeightedRandomSampler(train_dataset.sample_weights,
-    #                                       len(train_dataset.files),
-    #                                       replacement=False)
 
     train_loader = DataLoader(
         train_dataset,
-        # sampler=train_sampler,
         batch_size=batch_size['train'],
         num_workers=num_workers,
         pin_memory=pin_memory,
@@ -332,7 +351,7 @@ def load_sits(data_path, batch_size, num_workers, pin_memory=True,
     valid_loader = DataLoader(
         SitsDataset(root=data_path + "/val",
                      img_transform=test_transform,
-                     label_transform=gt_transforms,
+                     label_transform=test_gt_transform,
                      subset=data_subset),
         batch_size=batch_size['val'],
         num_workers=num_workers,
@@ -343,7 +362,7 @@ def load_sits(data_path, batch_size, num_workers, pin_memory=True,
     test_loader = DataLoader(
         SitsDataset(root=data_path + "/test",
                      img_transform=test_transform,
-                     label_transform=gt_transforms,
+                     label_transform=test_gt_transform,
                      subset=data_subset),
         batch_size=batch_size['test'],
         num_workers=num_workers,
