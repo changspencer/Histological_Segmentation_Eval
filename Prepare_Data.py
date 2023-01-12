@@ -102,6 +102,23 @@ def Prepare_DataLoaders(Network_parameters, splits, data_type='time'):
         val_indices.append([i for i in range(len(val_set))])
         test_indices.append([i for i in range(len(test_set))])
         print("*** PRMI Dataset acknowledged...")
+
+           
+   #SiTS_crop Dataset
+    elif Dataset == 'SiTS_crop':
+        #Get files for each fold - For now, I'm not using any folds here.
+        train_indices = []
+        val_indices = []
+        test_indices = []
+        # I'd like to avoid "double loading" this dataset in the future
+        imgs_dir = abspath(dirname(__file__)) + "/" + imgs_dir
+        train_set = RootsDataset(root=imgs_dir + "/train")
+        val_set = RootsDataset(root=imgs_dir + "/val")
+        test_set = RootsDataset(root=imgs_dir + "/test")
+        train_indices.append([i for i in range(len(train_set))])
+        val_indices.append([i for i in range(len(val_set))])
+        test_indices.append([i for i in range(len(test_set))])
+        print("*** SitS_crop Dataset acknowledged...")
     
     #Generate indices (img files) for training, validation, and test
     indices = {'train': train_indices, 'val': val_indices, 'test': test_indices}
