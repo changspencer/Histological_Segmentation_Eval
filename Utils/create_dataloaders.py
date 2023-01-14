@@ -86,6 +86,20 @@ def Get_Dataloaders(split,indices,Network_parameters,batch_size):
         #Get postive weight (for histological fat images only)
         pos_wt = 1
         
+    elif Network_parameters['Dataset'] == 'PS_PRMI':
+        train_loader, val_loader, test_loader = load_PRMI(Network_parameters['imgs_dir'],
+                                                          batch_size,
+                                                          Network_parameters['num_workers'],
+                                                          split=split,
+                                                          augment=Network_parameters['augment'],
+                                                          rotate=Network_parameters['rotate'],
+                                                          patch_size=Network_parameters['patch_size'],
+                                                          data_subset=['Peanut', 'Switchgrass'],
+                                                          train_class_lim=Network_parameters['train_class_lim'])
+       
+        #Get postive weight (for histological fat images only)
+        pos_wt = 1
+        
     elif Network_parameters['Dataset'] == 'SiTS':
         train_loader, val_loader, test_loader = load_sits(Network_parameters['imgs_dir'],
                                                           batch_size,
@@ -204,9 +218,10 @@ def load_PRMI(data_path, batch_size, num_workers, pin_memory=True,
     # Resize to some 4:3 ratio because PRMI data is in 4:3 ratio.
     # center_crop = [transforms.CenterCrop((patch_size * 3 // 4, patch_size))]
     resize_transform = [transforms.Resize((patch_size, patch_size))]
-    crop_transform = [transforms.RandomResizedCrop((patch_size, patch_size),
-                                                   scale=(0.9, 1.0),
-                                                   ratio=(1, 1))]
+    crop_transform = [transforms.RandomCrop((patch_size, patch_size))]
+    # crop_transform = [transforms.RandomResizedCrop((patch_size, patch_size),
+    #                                                scale=(0.9, 1.0),
+    #                                                ratio=(1, 1))]
                                                 #    ratio=(0.75, 0.75))]
     misc_transform = [
         QuantizedRotation(angles=[0, 90, 180, 270])
@@ -220,6 +235,8 @@ def load_PRMI(data_path, batch_size, num_workers, pin_memory=True,
     elif data_subset == ["Peanut", "Switchgrass"]:
         prmi_mean = (0.4910, 0.4621, 0.4246)
         prmi_dev = (0.1338, 0.1321, 0.1297)
+        # TODO - Maybe do rotation of switchgrass roots within RootsDataset instead
+        test_crop = [transforms.RandomCrop((480, 510))]
     else:  # data_subset is None
         prmi_mean = (0.5075, 0.4687, 0.4296)
         prmi_dev = (0.1302, 0.1275, 0.1245)

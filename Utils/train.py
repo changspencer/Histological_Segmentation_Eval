@@ -78,7 +78,7 @@ def train_net(net,device,indices,split,Network_parameters,epochs=5,
     dir_name,sum_name = Generate_Dir_Name(split, Network_parameters)
     run_no = split
 
-    if Network_parameters['Dataset'] in ["PRMI", "Peanut_PRMI"]:
+    if Network_parameters['Dataset'] in ["PRMI", "Peanut_PRMI", "PS_PRMI"]:
         split = 0
     
     since = time.time()
@@ -119,7 +119,6 @@ def train_net(net,device,indices,split,Network_parameters,epochs=5,
         Device:          {device.type}
     ''')
 
-   
     # Set optimizer
     if Network_parameters['optim'] == 'sgd':
         # Original PRMI weight decay is UNK. Trying a ~standard 1e-5. Momentum 0.8

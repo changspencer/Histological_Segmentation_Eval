@@ -106,15 +106,18 @@ class Up(nn.Module):
 class UpHist(nn.Module):
     """Upscaling then double conv with histogram layer concatenation"""
 
-    def __init__(self, in_channels, out_channels, num_bins,bilinear=True,
-                 normalize_count=True,normalize_bins = True,use_hist=True,
-                 up4=False,use_attention=False,add_bn=False,analyze=False,
+    def __init__(self, in_channels, out_channels, num_bins, bilinear=True,
+                 kernel_size=2, padding=0,
+                 normalize_count=True, normalize_bins = True, use_hist=True,
+                 up4=False, use_attention=False, add_bn=False, analyze=False,
                  parallel=False):
         super().__init__()
 
         self.use_attention = use_attention
         self.analyze = analyze
         self.parallel_hist = parallel
+        self.kernel_size = kernel_size
+        self.padding = padding
         # if bilinear, use the normal convolutions to reduce the number of channels
         if bilinear:
             self.up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
@@ -144,36 +147,44 @@ class UpHist(nn.Module):
                                                     int(out_channels/(2*num_bins)),1),
                                                     # nn.BatchNorm2d(int(out_channels/(2*num_bins))),
                                                     HistogramLayerUNET(int(out_channels/(2*num_bins)),
-                                                    kernel_size=2,num_bins=num_bins,
-                                                    normalize_count=normalize_count,
-                                                    normalize_bins=normalize_bins,
-                                                    skip_connection=True))
+                                                                       kernel_size=self.kernel_size,
+                                                                       num_bins=num_bins,
+                                                                       padding=self.padding,
+                                                                       normalize_count=normalize_count,
+                                                                       normalize_bins=normalize_bins,
+                                                                       skip_connection=True))
                 else:
                     self.hist_skip = nn.Sequential(nn.Conv2d(out_channels//2,
                                                    int(out_channels/(2*num_bins)),1),
                                                    HistogramLayerUNET(int(out_channels/(2*num_bins)),
-                                                   kernel_size=2,num_bins=num_bins,
-                                                   normalize_count=normalize_count,
-                                                   normalize_bins=normalize_bins,
-                                                   skip_connection=True))
+                                                                      kernel_size=self.kernel_size,
+                                                                      num_bins=num_bins,
+                                                                      padding=self.padding,
+                                                                      normalize_count=normalize_count,
+                                                                      normalize_bins=normalize_bins,
+                                                                      skip_connection=True))
             else:
                 if add_bn:
                     self.hist_skip = nn.Sequential(nn.Conv2d(out_channels,
                                                     int(out_channels/num_bins),1),
                                                     # nn.BatchNorm2d(int(out_channels/num_bins)),
                                                     HistogramLayerUNET(int(out_channels/num_bins),
-                                                    kernel_size=2,num_bins=num_bins,
-                                                    normalize_count=normalize_count,
-                                                    normalize_bins=normalize_bins,
-                                                    skip_connection=True))
+                                                                       kernel_size=self.kernel_size,
+                                                                       num_bins=num_bins,
+                                                                       padding=self.padding,
+                                                                       normalize_count=normalize_count,
+                                                                       normalize_bins=normalize_bins,
+                                                                       skip_connection=True))
                 else:
                     self.hist_skip = nn.Sequential(nn.Conv2d(out_channels,
                                                    int(out_channels/num_bins),1),
                                                    HistogramLayerUNET(int(out_channels/num_bins),
-                                                   kernel_size=2,num_bins=num_bins,
-                                                   normalize_count=normalize_count,
-                                                   normalize_bins=normalize_bins,
-                                                   skip_connection=True))                    
+                                                                      kernel_size=self.kernel_size,
+                                                                      num_bins=num_bins,
+                                                                      padding=self.padding,
+                                                                      normalize_count=normalize_count,
+                                                                      normalize_bins=normalize_bins,
+                                                                      skip_connection=True))
         else:
             self.hist_skip = nn.Sequential()
             

@@ -22,8 +22,8 @@ class JOSHUA(nn.Module):
     def __init__(self,n_channels,n_classes,skip=True,pool=True,bilinear=True,
                  num_bins=4,normalize_count=True,normalize_bins=True,
                  skip_locations=[True,True,True,True],
-                 pool_locations=[True,True,True,True],use_attention=False,
-                 feature_extraction = False, add_bn=True,analyze=False,
+                 pool_locations=[True,True,True,True], use_attention=False,
+                 feature_extraction = False, kernels=[2, 2, 2, 2], add_bn=True,analyze=False,
                  parallel=False):
         
         #inherit nn.module
@@ -75,6 +75,8 @@ class JOSHUA(nn.Module):
                               normalize_bins=normalize_bins,
                               use_hist=skip_locations[0],
                               use_attention=use_attention,
+                              kernel_size=kernels[0],
+                              padding=kernels[0] - 2,
                               add_bn=add_bn,
                               parallel=self.parallel_hist)
             self.up2 = UpHist(512, 256, num_bins, bilinear=bilinear,
@@ -82,6 +84,8 @@ class JOSHUA(nn.Module):
                               normalize_bins=normalize_bins,
                               use_hist=skip_locations[1],
                               use_attention=use_attention,
+                              kernel_size=kernels[1],
+                              padding=kernels[1] - 2,
                               add_bn=add_bn,
                               parallel=self.parallel_hist)
             self.up3 = UpHist(256, 128, num_bins, bilinear=bilinear,
@@ -89,6 +93,8 @@ class JOSHUA(nn.Module):
                               normalize_bins=normalize_bins,
                               use_hist=skip_locations[2],
                               use_attention=use_attention,
+                              kernel_size=kernels[2],
+                              padding=kernels[2] - 2,
                               add_bn=add_bn,
                               parallel=self.parallel_hist)
             self.up4 = UpHist(128, 64 * factor, num_bins, bilinear,
@@ -96,7 +102,10 @@ class JOSHUA(nn.Module):
                               normalize_bins=normalize_bins,
                               use_hist=skip_locations[3],up4=True,
                               use_attention=use_attention,
-                              add_bn=add_bn,analyze=self.analyze,
+                              kernel_size=kernels[3],
+                              padding=kernels[3] - 2,
+                              add_bn=add_bn,
+                              analyze=self.analyze,
                               parallel=self.parallel_hist)
         else:
             self.up1 = Up(1024, 512, bilinear)
@@ -105,12 +114,6 @@ class JOSHUA(nn.Module):
             self.up4 = Up(128, 64 * factor, bilinear)
         
         self.outc = OutConv(64, n_classes)
-        
-        # # Change the initialization for the convolutional models
-        # for mod in self.modules():
-        #     if isinstance(mod, nn.Conv2d):
-        #         init.xavier_normal_(mod.weight)
-        #         init.constant_(mod.bias, 0)
 
     def forward(self, x):
        

@@ -88,7 +88,7 @@ def Prepare_DataLoaders(Network_parameters, splits, data_type='time'):
 
 
    #Glas Dataset
-    elif Dataset in ['PRMI', 'Peanut_PRMI']:
+    elif Dataset in ['PRMI', 'Peanut_PRMI', 'PS_PRMI']:
         #Get files for each fold - For now, I'm not using any folds here.
         train_indices = []
         val_indices = []

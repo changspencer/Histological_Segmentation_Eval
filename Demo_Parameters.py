@@ -54,6 +54,10 @@ def Parameters(args):
     #(default:  all levels, up to 4 different locations)
     skip_locations = [True,True,True,True]
     pool_locations = [True,True,True,True]
+    if args.hist_size == 1:
+        hist_size = [3, 3, 2, 2]  # Larger size for the shallow information
+    else:
+        hist_size = [2, 2, 2, 2]  # Default
     
     #Select dataset. Set to number of desired segmentation dataset
     data_selection = args.data_selection
@@ -62,7 +66,8 @@ def Parameters(args):
         2: 'GlaS',
         3: 'PRMI',
         4: 'Peanut_PRMI',
-        5: 'SiTS'
+        5: 'PS_PRMI',
+        6: 'SiTS'
     }
     
     #If SFBHI, generate images with adipose tissue graphs
@@ -89,7 +94,7 @@ def Parameters(args):
     patch_size = args.patch_size
     
     #Number of folds for K fold CV
-    fold_datasets = {1: 5, 2: 5, 3: 1, 4: 1}
+    fold_datasets = {1: 5, 2: 5, 3: 1, 4: 1, 5: 1, 6: 1}
     folds = fold_datasets[args.data_selection]
     
     #Set random state for K fold CV for repeatability of data/model initialization
@@ -163,6 +168,7 @@ def Parameters(args):
                 'GlaS':  true_dir +'Datasets/GlaS/',
                 'PRMI':  true_dir +'Datasets/PRMI/PRMI_official',
                 'Peanut_PRMI':  true_dir +'Datasets/PRMI/PRMI_official',
+                'PS_PRMI':  true_dir +'Datasets/PRMI/PRMI_official',
                 'SiTS':  true_dir +'Datasets/SiTS'}
     
     #Light directory
@@ -170,6 +176,7 @@ def Parameters(args):
                  'GlaS': true_dir+'Datasets/GlaS/',
                  'PRMI': true_dir+'Datasets/PRMI/PRMI_official',
                  'Peanut_PRMI': true_dir+'Datasets/PRMI/PRMI_official',
+                 'PS_PRMI': true_dir+'Datasets/PRMI/PRMI_official',
                  'SiTS': true_dir+'Datasets/SiTS'}
         
     #Number of classes in each dataset
@@ -177,6 +184,7 @@ def Parameters(args):
                   'GlaS': 1,
                   'PRMI': 1,
                   'Peanut_PRMI': 1,
+                  'PS_PRMI': 1,
                   'SiTS': 1}  # only binary root segmentation
     
     #Number of runs and/or splits for each dataset (5 fold)
@@ -186,12 +194,14 @@ def Parameters(args):
                   'GlaS': 5,
                   'PRMI': args.num_seeds,
                   'Peanut_PRMI': args.num_seeds,
+                  'PS_PRMI': args.num_seeds,
                   'SiTS': args.num_seeds}
     else:
         Splits = {'SFBHI': 5, 
                   'GlaS': 5,
                   'PRMI': args.num_seeds,
                   'Peanut_PRMI': args.num_seeds,
+                  'PS_PRMI': args.num_seeds,
                   'SiTS': args.num_seeds}
 
     Dataset = Dataset_names[data_selection]
@@ -238,6 +248,7 @@ def Parameters(args):
                           'parallel_skips': parallel_skips,
                           'skip_locations': skip_locations, 'channels': channels,
                           'pool_locations': pool_locations, 'bilinear': bilinear,
+                          'hist_size': hist_size,
                           'random_state': random_state, 'save_cp': save_cp,
                           'save_epoch': save_epoch, 'use_attention': use_attention,
                           'augment': augment, 'rotate': rotate, 'show_fat': show_fat,

@@ -34,6 +34,7 @@ def initialize_model(model_name, num_classes, Network_parameters,
                              pool_locations=Network_parameters['pool_locations'],
                              use_attention=Network_parameters['use_attention'],
                              feature_extraction=Network_parameters['feature_extraction'],
+                             kernels=Network_parameters['hist_size'],
                              add_bn=Network_parameters['add_bn'],
                              analyze=analyze,
                              parallel=Network_parameters['parallel_skips'])
