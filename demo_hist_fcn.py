@@ -171,7 +171,7 @@ def fcn_main(Params):
 if __name__ == "__main__":
     true_dir = path.abspath(path.dirname(__file__)) + "/"
     train_params = {'save_results': True,
-                    'folder': "Saved_Models/",
+                    'folder': true_dir + "Saved_Models/",
                     'Dataset': "Peanut_PRMI",
                     'imgs_dir': true_dir +'Datasets/PRMI/PRMI_official',
                     'masks_dir': true_dir + 'Datasets/PRMI/PRMI_official',
