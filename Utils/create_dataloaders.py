@@ -235,11 +235,13 @@ def load_PRMI(data_path, batch_size, num_workers, pin_memory=True,
     elif data_subset == ["Peanut", "Switchgrass"]:
         prmi_mean = (0.4910, 0.4621, 0.4246)
         prmi_dev = (0.1338, 0.1321, 0.1297)
-        # TODO - Maybe do rotation of switchgrass roots within RootsDataset instead
+        # TODO - Maybe do rotation of SWITCHGRASS roots within RootsDataset instead
         test_crop = [transforms.RandomCrop((480, 510))]
     else:  # data_subset is None
         prmi_mean = (0.5075, 0.4687, 0.4296)
         prmi_dev = (0.1302, 0.1275, 0.1245)
+        # TODO - Maybe do rotation of SWITCHGRASS roots within RootsDataset instead
+        test_crop = [transforms.RandomCrop((480, 510))]
 
     # Train data transforms: Resizing and maybe some data augmentation
     if augment:

@@ -22,7 +22,7 @@ def initialize_model(model_name, num_classes, Network_parameters,
                     analyze=False, comet_exp=None):
  
     #Generate segmentation model 
-    if (model_name == 'JOSHUA') or (model_name == 'JOSHUA+') or (model_name == 'JOSHUAres'):
+    if model_name in ['JOSHUA', 'JOSHUA+', 'JOSHUAres', 'BNH']:
             model = JOSHUA(Network_parameters['channels'],num_classes,
                              skip=Network_parameters['histogram_skips'],
                              pool=Network_parameters['histogram_pools'],
@@ -41,7 +41,7 @@ def initialize_model(model_name, num_classes, Network_parameters,
 
     # PRMI UNET model for the roots segmentation
     #!! Commented out to retain comparability with JOSHUA models
-    elif (model_name == 'XuNET') and Network_parameters['Dataset'] in ['PRMI', 'Peanut_PRMI']: 
+    elif (model_name == 'XuNET') and Network_parameters['Dataset'] in ['PRMI', 'Peanut_PRMI', 'PS_PRMI']: 
         model = PrmiUNet(num_classes, Network_parameters['channels'],
                          depth=5)
 

@@ -25,10 +25,11 @@ def Parameters(args):
     
     seg_models = {'UNET': 0, 'UNET+': 1, 'Attention_UNET': 2,
                   'JOSHUA': 3, 'JOSHUA+': 4, 'JOSHUAres': 5, 'XuNET': 6,
-                  'FCN': 7}
+                  'FCN': 7, 'BNH': 8}
     #model_selection = {0: 1, 1: 1, 2: 4, 3: 1, 4: 1}
-    hist_skips = {0: False, 1: False, 2: False, 3: True, 4: True, 5: True, 6: False, 7: False}
-    attention = {0: False, 1: True, 2: True, 3: False, 4: True, 5: False, 6: False, 7: False}
+    hist_skips = {0: False, 1: False, 2: False, 3: True, 4: True, 5: True, 6: False, 7: False, 8: False}
+    hist_pools = {0: False, 1: False, 2: False, 3: False, 4: False, 5: False, 6: False, 7: False, 8: True}
+    attention = {0: False, 1: True, 2: True, 3: False, 4: True, 5: False, 6: False, 7: False, 8: False}
     
     #Flag for to save out model at certain checkpoints (default: every 5 epochs)
     #Set to True to save results out and False to not save results
@@ -43,7 +44,7 @@ def Parameters(args):
     # Set either to True to use histogram layer(s) and both to False to use baseline model 
     # Use histogram(s) as attention mechanism, set to True
     histogram_skips = hist_skips[seg_models[model]]
-    histogram_pools = False  # Use histogram pooling for DownConvs
+    histogram_pools = hist_pools[seg_models[model]]  # Use histogram pooling for DownConvs
     use_attention = attention[seg_models[model]]
 
     # Create histogram features in parallel on shortcuts
@@ -53,7 +54,7 @@ def Parameters(args):
     #Will need to set to True to add histogram layer and False to not add histogram layer
     #(default:  all levels, up to 4 different locations)
     skip_locations = [True,True,True,True]
-    pool_locations = [True,True,True,True]
+    pool_locations = [False,False,False,True]
     if args.hist_size == 1:
         hist_size = [3, 3, 2, 2]  # Larger size for the shallow information
     else:
