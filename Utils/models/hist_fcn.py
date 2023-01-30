@@ -196,7 +196,7 @@ class HistFCN(nn.Module):
         self.shortcut = nn.Sequential(
             nn.Conv2d(384, 96, 3, padding=1, bias=False),
             nn.ReLU(inplace=True),
-            nn.BatchNorm2d(96),
+            # nn.BatchNorm2d(96),
             nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False),
             nn.Dropout(dropout),
             nn.Conv2d(96, num_classes, 1),
@@ -206,7 +206,7 @@ class HistFCN(nn.Module):
         self.head = nn.Sequential(
             nn.Conv2d(256, 64, kernel_size=3, padding=1, bias=False),
             nn.ReLU(inplace=True),
-            nn.BatchNorm2d(64),
+            # nn.BatchNorm2d(64),
             nn.Upsample(scale_factor=4, mode='bilinear', align_corners=False),
         # )
         # self.out_conv = nn.Sequential(

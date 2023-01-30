@@ -68,7 +68,7 @@ def Parameters(args):
         3: 'PRMI',
         4: 'Peanut_PRMI',
         5: 'PS_PRMI',
-        6: 'SiTS'
+        6: 'SiTS_crop'
     }
     
     #If SFBHI, generate images with adipose tissue graphs
@@ -170,7 +170,7 @@ def Parameters(args):
                 'PRMI':  true_dir +'Datasets/PRMI/PRMI_official',
                 'Peanut_PRMI':  true_dir +'Datasets/PRMI/PRMI_official',
                 'PS_PRMI':  true_dir +'Datasets/PRMI/PRMI_official',
-                'SiTS':  true_dir +'Datasets/SiTS'}
+                'SiTS_crop':  true_dir +'Datasets/SiTS_crop'}
     
     #Light directory
     mask_dirs = {'SFBHI':true_dir+ 'Datasets/SFBHI/Labels/', 
@@ -178,7 +178,7 @@ def Parameters(args):
                  'PRMI': true_dir+'Datasets/PRMI/PRMI_official',
                  'Peanut_PRMI': true_dir+'Datasets/PRMI/PRMI_official',
                  'PS_PRMI': true_dir+'Datasets/PRMI/PRMI_official',
-                 'SiTS': true_dir+'Datasets/SiTS'}
+                 'SiTS_crop': true_dir+'Datasets/SiTS_crop'}
         
     #Number of classes in each dataset
     num_classes = {'SFBHI': 1, 
@@ -186,7 +186,7 @@ def Parameters(args):
                   'PRMI': 1,
                   'Peanut_PRMI': 1,
                   'PS_PRMI': 1,
-                  'SiTS': 1}  # only binary root segmentation
+                  'SiTS_crop': 1}  # only binary root segmentation
     
     #Number of runs and/or splits for each dataset (5 fold)
     #For SFBHI, should be 5 unless "time" split (4)
@@ -196,14 +196,14 @@ def Parameters(args):
                   'PRMI': args.num_seeds,
                   'Peanut_PRMI': args.num_seeds,
                   'PS_PRMI': args.num_seeds,
-                  'SiTS': args.num_seeds}
+                  'SiTS_crop': args.num_seeds}
     else:
         Splits = {'SFBHI': 5, 
                   'GlaS': 5,
                   'PRMI': args.num_seeds,
                   'Peanut_PRMI': args.num_seeds,
                   'PS_PRMI': args.num_seeds,
-                  'SiTS': args.num_seeds}
+                  'SiTS_crop': args.num_seeds}
 
     Dataset = Dataset_names[data_selection]
     imgs_dir = img_dirs[Dataset]

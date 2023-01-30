@@ -38,7 +38,7 @@ class myFCN(nn.Module):
         # Shortcut upsampling connections
         self.shortcut = nn.Sequential(
             nn.Conv2d(384, 96, 3, padding=1, bias=False),
-            nn.BatchNorm2d(96),
+            # nn.BatchNorm2d(96),
             nn.ReLU(inplace=True),
             nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False),
             nn.Dropout(dropout),
@@ -48,7 +48,7 @@ class myFCN(nn.Module):
         # Final Concatenation part - connects with output of self.conv4
         self.head = nn.Sequential(
             nn.Conv2d(256, 64, kernel_size=3, padding=1, bias=False),
-            nn.BatchNorm2d(64),
+            # nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
             nn.Upsample(scale_factor=4, mode='bilinear', align_corners=False),
             nn.Dropout(dropout),
