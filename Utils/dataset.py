@@ -194,7 +194,7 @@ class RootsDataset(Dataset):
         imgdir = os.path.join(self.root, 'images')
 
         for os_root, dirs, files in os.walk(imgdir):
-            if os_root.find("_noMask") > -1:
+            if os_root.find("_noMask") > -1 or os_root.find("- Copy") > -1 or os_root.find("_balanced") > -1:
                 continue
 
             curr_class_idx = None
@@ -208,7 +208,7 @@ class RootsDataset(Dataset):
                 continue
 
             for name in files:
-                if name == "placeholder.file":
+                if name == "placeholder.file" or ".db" in name:
                     continue
 
                 imgpath = os.path.join(os_root, name)
@@ -280,7 +280,7 @@ class RootsDataset(Dataset):
         label = np.array(label)
 
         # Need to flip PRMI roots labeling (make 0 be soil)
-        label = -label + label.max()
+        # label = -label + label.max()    # This was used for Wei's old PRMI dataset location
         return {'image':img, 'mask': label, 'index': img_name, 'label': label_file}
 
 

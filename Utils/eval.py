@@ -56,7 +56,8 @@ def eval_net(net, loader, device, pos_wt=torch.tensor(1),
             mask_pred = net(imgs)
             temp_end_time = (time.time() - temp_start_time)/imgs.size(0)
             inf_time += temp_end_time
-            
+            del imgs
+
         try:
             n_classes = net.module.n_classes
         except:

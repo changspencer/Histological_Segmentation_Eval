@@ -3,6 +3,7 @@ import logging
 import os
 import sys
 import datetime
+from copy import deepcopy
 
 import numpy as np
 import torch
@@ -343,16 +344,16 @@ def train_net(net,device,indices,split,Network_parameters,epochs=5,
                                                                                                   val_dict['pos_IOU'],
                                                                                                   val_dict['dice'],
                                                                                                   val_dict['inf_time']))
-                        val_dice_track[epoch] = sum(val_iter_track)/len(val_iter_track)
+                        #? deprecated - Only average the last 100 epochs when comparing to the best DICE
+                        val_dice_track[epoch] = sum(val_iter_track[-100:]) / len(val_iter_track[-100:])  #len(val_iter_track)
                         
                     early_stopping(val_dict['loss'], net)
                 
         
         # Check dice coefficient and save best model
-        if val_dice_track[epoch] > best_dice:
-            best_dice = val_dice_track[epoch]
-            best_wts = net.state_dict()
-            best_model = net
+        if val_iter_track[epoch] > best_dice:
+            best_dice = val_iter_track[epoch]
+            best_wts = deepcopy(net.state_dict())
             best_model = net
             val_metrics = val_dict
 

@@ -50,7 +50,7 @@ def main(Params, args):
         torch.cuda.manual_seed(Params['random_state'])
         torch.cuda.manual_seed_all(Params['random_state'])
     else:
-        print(f"Initial Torch seed: {torch.seed()}")
+        print(f"Initial Torch seed: {torch.get_rng_state()}")
         
     #Name of dataset
     Dataset = Params['Dataset']
